@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>NewOrder</title>
+<script src="/static/lib/angular/angular.min.js"></script>
+<script src="/static/lib/angular/angular-resource.min.js"></script>
+<script src="/static/js/script.js"></script>
+
+<!-- Standard Favicon -->
+<link rel="icon" type="image/x-icon" href="/static/img/favicon.ico" />
+
+<!-- For iPhone 4 Retina display: -->
+<link rel="apple-touch-icon-precomposed" sizes="114x114" href="/static/img/114.png">
+
+<!-- For iPad: -->
+<link rel="apple-touch-icon-precomposed" sizes="72x72" href="/static/img/72.png">
+
+<!-- For iPhone: -->
+<link rel="apple-touch-icon-precomposed" href="/static/img/57.png">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=yes">
+<link rel="stylesheet" href="/static/css/bootstrap.min.css" type="text/css" >
+<link rel="stylesheet" href="/static/css/bs_modified.css" type="text/css" >
+<script>
+var appMod = angular.module('crmapp', []);
+appMod.controller('NewOrdersController', ['$scope', function($scope) {
+
+    function FetchCompanies(){
+    $scope.availableCompanies = ["Precision Drawell", "Mohinder"];
+    }
+    $scope.DefaultCasingTypes=["Straight", "Taper"];
+    $scope.DefaultPelletSizes=["10x08", "13x10", "15x13", "17x15", "19x17", "22x18", "25x20", "30x24", "35x24"];
+    $scope.DefaultCasingSizes=["28x16", "28x20", "38x26", "40x28", "43x28", "50x35", "53x25", "70x40"];
+
+    $scope.DateChanged = function() {
+    var today = new Date();
+    if (today < $scope.order.PODate) {
+    $scope.order.PODate = today;
+    }
+
+    $scope.dateDiffFromTodayAsText = GetDateDiffAsText($scope.order.PODate);
+    $scope.order.PODateAsSeconds = JSDateToUnixTime($scope.order.PODate);
+    }
+
+    FetchCompanies();
+
+    if (Debug()){
+      $scope.order = {};
+      $scope.order.CompanyName = "Precision Drawell";
+      $scope.order.PODate = new Date();
+      $scope.order.PONumber = "111";
+    }
+
+}]);
+
+</script>
+</head>
+<body ng-app="crmapp" ng-controller="NewOrdersController">
+<div class="well">
+  <a href="/"><img class="center-block" src="/static/img/57.png" /></a>
+  <h1 class="text-center">New Order</h1>
+</div>
+<div class="container">
+  <div class="row"><!-- PO Row -->
+    <div class="col-xs-4">
+      <select ng-model="order.CompanyName" class="form-control" ng-options="k as k for k in availableCompanies"></select>
+      <div class="text-center">or</div>
+      <button class="form-control btn btn-warning">Create Company</button>
+    </div>
+    <div class="col-xs-4">
+      <input ng-model="order.PONumber" type="text" class="form-control" placeholder="PO#"></input>
+    </div>
+    <div class="col-xs-4">
+      <input required class="center-block" autofocus="true" title="PO Date" type="date" ng-model="order.PODate" ng-change="DateChanged()" />
+      <div class="text-center" ng-bind="dateDiffFromTodayAsText"></div>
+    </div>
+  </div><!-- PO Row -->
+  <hr>
+  <div ng-show="order.CompanyName && order.PONumber && order.PODate">
+    <div class="row"><!-- orphan row -->
+      <div class="col-xs-12">
+        <div class="row">
+          <div class="col-xs-10">
+            <select ng-model="orphan.PelletSize" class="form-control" ng-options="k as k for k in DefaultPelletSizes" placeholder="Pellet Size"></select>
+          </div>
+          <div class="col-xs-2">
+            <button  class="form-control btn btn-warning">Create Pellet Size</button>
+          </div>
+        </div>
+      </div>
+      <div class="col-xs-12">
+        <div class="row">
+          <div class="col-xs-10">
+            <select ng-model="orphan.CasingSize" class="form-control" ng-options="k as k for k in DefaultCasingSizes" placeholder="Casing Size">
+              <option value='' disabled selected style='display:none;'>Casing Size</option>
+            </select>
+          </div>
+          <div class="col-xs-2">
+            <button  class="form-control btn btn-warning">New Casing</button>
+          </div>
+        </div>
+      </div>
+      <div class="col-xs-12">
+        <select ng-model="orphan.CasingType" type="text" class="form-control" ng-options="k as k for k in DefaultCasingTypes" placeholder="Straight"></select>
+      </div>
+      <div class="col-xs-12">
+        <input ng-model="orphan.BoreSize" type="number" class="form-control" step=".01" placeholder="Bore"></input>
+      </div>
+      <div class="col-xs-12">
+        <input ng-model="orphan.Qty" type="number" class="form-control" placeholder="Qty"></input>
+      </div>
+      <div class="col-xs-12">
+        <button class="form-control btn btn-info" ng-click="AddTcDieOrphanRowInOrder">Add Die Order</button>
+      </div>
+    </div><!-- orphan row -->
+  </div><!-- ng-show-->
+</div> <!-- container -->
+</body>
+</html>
