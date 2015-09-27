@@ -42,12 +42,14 @@ chown -R vagrant:vagrant $GOPATH
 
 
 cat >> /home/vagrant/.bashrc <<EOL
-PYTHONPATH=/vagrant
-GOPATH=$GOPATH
 PATH=$GOPATH/bin:$GAE_DIR:\$PATH
 cd /vagrant
 EOL
 
+cat >> /home/vagrant/.pam_environment <<EOL
+PYTHONPATH=/vagrant
+GOPATH=$GOPATH
+EOL
 
 echo "______________"
 echo "Installing go-martini"
@@ -89,8 +91,8 @@ EOL
 
 cat > /etc/supervisor/conf.d/goserve_sdatcrm.conf <<EOL
 [program:goserve_sdatcrm]
-command=$GAE_DIR/goapp serve -host :: /vagrant/app.yaml
-stdout_logfile=/vagrant/vagrantlogs.log
+command=$GAE_DIR/goapp serve --use_mtime_file_watcher=True -host :: /vagrant/app.yaml
+stdout_logfile=/tmp/vagrantlogs.log
 autostart=true
 redirect_stderr=true
 EOL

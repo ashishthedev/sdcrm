@@ -42,6 +42,17 @@ appMod.controller('NewOrdersController', ['$scope', function($scope) {
     $scope.order.PODateAsSeconds = JSDateToUnixTime($scope.order.PODate);
     }
 
+    $scope.AddMiscOrphanRowInOrder = function(){
+      alert("here");
+      var items = $scope.order.Items;
+      var newItem = {};
+      newItem.Type = "Misc"
+      newItem.Remarks = orphan.Misc.Remarks;
+      newItem.Qty = orphan.Misc.Qty;
+      items.splice(1,0,angular.copy(newItem));
+
+    }
+
     FetchCompanies();
 
     if (Debug()){
@@ -61,11 +72,11 @@ appMod.controller('NewOrdersController', ['$scope', function($scope) {
   <h1 class="text-center">New Order</h1>
 </div>
 <div class="container">
-  <div class="row"><!-- PO Row -->
+  <div class="row"><!-- PO Global Details Row -->
     <div class="col-xs-4">
       <select ng-model="order.CompanyName" class="form-control" ng-options="k as k for k in availableCompanies"></select>
       <div class="text-center">or</div>
-      <button class="form-control btn btn-warning">Create Company</button>
+      <button class="form-control btn btn-warning">Create Company(TODO)</button>
     </div>
     <div class="col-xs-4">
       <input ng-model="order.PONumber" type="text" class="form-control" placeholder="PO#"></input>
@@ -74,45 +85,95 @@ appMod.controller('NewOrdersController', ['$scope', function($scope) {
       <input required class="center-block" autofocus="true" title="PO Date" type="date" ng-model="order.PODate" ng-change="DateChanged()" />
       <div class="text-center" ng-bind="dateDiffFromTodayAsText"></div>
     </div>
-  </div><!-- PO Row -->
+  </div><!-- PO Global Details Row -->
+
   <hr>
+
   <div ng-show="order.CompanyName && order.PONumber && order.PODate">
-    <div class="row"><!-- orphan row -->
-      <div class="col-xs-12">
+    <div class="row"><!-- showorder row -->
+      <div ng-repeat="item in order.Items" class="row">
         <div class="row">
-          <div class="col-xs-10">
-            <select ng-model="orphan.PelletSize" class="form-control" ng-options="k as k for k in DefaultPelletSizes" placeholder="Pellet Size"></select>
-          </div>
-          <div class="col-xs-2">
-            <button  class="form-control btn btn-warning">Create Pellet Size</button>
-          </div>
+          <span ng-bind="item.Type"></span>
+          <span ng-bind="item.Qty"></span>
+          <span ng-bind="item.Remarks"></span>
         </div>
       </div>
-      <div class="col-xs-12">
+    </div>
+
+    <div class="row"><!-- orphan TCDie row -->
+      <div class="col-xs-12"> <!-- Pellet Row -->
         <div class="row">
           <div class="col-xs-10">
-            <select ng-model="orphan.CasingSize" class="form-control" ng-options="k as k for k in DefaultCasingSizes" placeholder="Casing Size">
+            <select ng-model="orphan.TCDO.PelletSize" class="form-control" ng-options="k as k for k in DefaultPelletSizes">
+              <option value='' disabled selected style='display:none;'>Pellet Size...</option>
+            </select>
+          </div>
+          <div class="col-xs-2">
+            <button  class="form-control btn btn-warning"> + (TODO)</button>
+          </div>
+        </div>
+      </div> <!-- Pellet Row -->
+      <div class="col-xs-12"><!-- Casing Row -->
+        <div class="row">
+          <div class="col-xs-10">
+            <select ng-model="orphan.TCDO.CasingSize" class="form-control" ng-options="k as k for k in DefaultCasingSizes">
               <option value='' disabled selected style='display:none;'>Casing Size</option>
             </select>
           </div>
           <div class="col-xs-2">
-            <button  class="form-control btn btn-warning">New Casing</button>
+            <button  class="form-control btn btn-warning"> + (TODO)</button>
+          </div>
+        </div>
+      </div><!-- Casing Row -->
+      <div class="col-xs-12">
+        <select ng-model="orphan.TCDO.CasingType" type="text" class="form-control" ng-options="k as k for k in DefaultCasingTypes" placeholder="Straight"></select>
+      </div>
+      <div class="col-xs-12">
+        <input ng-model="orphan.TCDO.BoreSize" type="number" class="form-control" step=".01" placeholder="Bore"></input>
+      </div>
+      <div class="col-xs-12">
+        <input ng-model="orphan.TCDO.Qty" type="number" class="form-control" placeholder="Qty"></input>
+      </div>
+      <div class="col-xs-12">
+        <input ng-model="orphan.TCDO.Remarks" type="text" class="form-control" placeholder="Remarks if any..."></input>
+      </div>
+      <div class="col-xs-12">
+        <button class="form-control btn btn-info" ng-click="AddTcDieOrphanRowInOrder"> Add Order</button>
+      </div>
+    </div><!-- orphan TC Die row -->
+    
+
+    <hr>
+
+
+    <div class="row"><!-- orphan Misc row -->
+      <div class="container">
+        <div class="row">
+          <div class="col-xs-5">
+            <input ng-model="orphan.Misc.Name" type="text" class="form-control" placeholder="Item..."></input>
+          </div>
+
+          <div class="col-xs-5">
+            <input ng-model="orphan.Misc.Qty" type="number" class="form-control" placeholder="Qty"></input>
+          </div>
+          <div class="col-xs-2">
+            <input ng-model="orphan.Misc.Unit" type="text" class="form-control" placeholder="pc/gm..."></input>         
+          </div>
+        </div>
+        <div class="row">
+        <div class="col-xs-12">
+            <input ng-model="orphan.Misc.Remarks" type="text" class="form-control" placeholder="Remarks if any..."></input>          
+            </div>
+        </div>
+        <div class="row">
+          <div class="col-xs-12">
+            <button class="form-control btn btn-info" ng-click="AddMiscOrphanRowInOrder()"> Add Misc Order</button>
           </div>
         </div>
       </div>
-      <div class="col-xs-12">
-        <select ng-model="orphan.CasingType" type="text" class="form-control" ng-options="k as k for k in DefaultCasingTypes" placeholder="Straight"></select>
-      </div>
-      <div class="col-xs-12">
-        <input ng-model="orphan.BoreSize" type="number" class="form-control" step=".01" placeholder="Bore"></input>
-      </div>
-      <div class="col-xs-12">
-        <input ng-model="orphan.Qty" type="number" class="form-control" placeholder="Qty"></input>
-      </div>
-      <div class="col-xs-12">
-        <button class="form-control btn btn-info" ng-click="AddTcDieOrphanRowInOrder">Add Die Order</button>
-      </div>
-    </div><!-- orphan row -->
+    </div><!-- orphan Misc row -->
+
+
   </div><!-- ng-show-->
 </div> <!-- container -->
 </body>
