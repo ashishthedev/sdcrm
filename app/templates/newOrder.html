@@ -43,12 +43,11 @@ appMod.controller('NewOrdersController', ['$scope', function($scope) {
     }
 
     $scope.AddMiscOrphanRowInOrder = function(){
-      alert("here");
       var items = $scope.order.Items;
       var newItem = {};
       newItem.Type = "Misc"
-      newItem.Remarks = orphan.Misc.Remarks;
-      newItem.Qty = orphan.Misc.Qty;
+      newItem.Remarks = $scope.orphan.Misc.Remarks;
+      newItem.Qty = $scope.orphan.Misc.Qty;
       items.splice(1,0,angular.copy(newItem));
 
     }
@@ -60,6 +59,14 @@ appMod.controller('NewOrdersController', ['$scope', function($scope) {
       $scope.order.CompanyName = "Precision Drawell";
       $scope.order.PODate = new Date();
       $scope.order.PONumber = "111";
+
+      $scope.orphan = {};
+       $scope.orphan.Misc = {};
+      $scope.orphan.Misc.Remarks="Misc Remarks";
+      $scope.orphan.Misc.Qty = parseInt(2);
+      $scope.orphan.Misc.Name = "Boron Carbide";
+
+      $scope.order.Items = [];
     }
 
 }]);
@@ -161,9 +168,9 @@ appMod.controller('NewOrdersController', ['$scope', function($scope) {
           </div>
         </div>
         <div class="row">
-        <div class="col-xs-12">
+          <div class="col-xs-12">
             <input ng-model="orphan.Misc.Remarks" type="text" class="form-control" placeholder="Remarks if any..."></input>          
-            </div>
+          </div>
         </div>
         <div class="row">
           <div class="col-xs-12">
