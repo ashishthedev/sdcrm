@@ -1,4 +1,4 @@
-application: todo
+application: sdatcrm
 version: live
 runtime: go
 api_version: go1
@@ -13,19 +13,6 @@ handlers:
   static_dir: static
   expiration: "1s"
 
-- url: /faq
-  static_files: templates/faq.html
-  upload: templates/faq.html
-  login: admin
-
-- url: /a/.*
-  script: _go_app
-  login: admin
-
-- url: /a
-  script: _go_app
-  login: admin
-
 - url: /.*
   script: _go_app
-  login: required
+  login: admin
