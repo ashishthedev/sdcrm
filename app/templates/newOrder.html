@@ -42,6 +42,22 @@ appMod.controller('NewOrdersController', ['$scope', function($scope) {
     $scope.order.PODateAsSeconds = JSDateToUnixTime($scope.order.PODate);
     }
 
+    $scope.AddTcDieOrphanRowInOrder = function(){
+      var items = $scope.order.Items;
+      var o = $scope.orphan.TCDO;
+      var newItem = {};
+      newItem.Type = "TCD"
+      newItem.Remarks = o.Remarks;
+      newItem.PelletSize = o.PelletSize;
+      newItem.BoreSize = o.BoreSize;
+      newItem.CasingType = o.CasingType;
+      newItem.CasingSize = o.CasingSize;
+      newItem.Qty = o.Qty;
+      items.splice(1,0,angular.copy(newItem));
+
+    }
+
+
     $scope.AddMiscOrphanRowInOrder = function(){
       var items = $scope.order.Items;
       var newItem = {};
@@ -61,10 +77,20 @@ appMod.controller('NewOrdersController', ['$scope', function($scope) {
       $scope.order.PONumber = "111";
 
       $scope.orphan = {};
-       $scope.orphan.Misc = {};
+      $scope.orphan.Misc = {};
       $scope.orphan.Misc.Remarks="Misc Remarks";
       $scope.orphan.Misc.Qty = parseInt(2);
       $scope.orphan.Misc.Name = "Boron Carbide";
+
+      $scope.orphan.TCDO = {};
+      $scope.orphan.TCDO.Remarks="TCDO Remarks";
+      $scope.orphan.TCDO.Qty = parseInt(10001);
+      $scope.orphan.TCDO.Name = "TC Die";
+      $scope.orphan.TCDO.PelletSize = "10x08";
+      $scope.orphan.TCDO.CasingSize = "28x20";
+      $scope.orphan.TCDO.CasingType = "Straight";
+      $scope.orphan.TCDO.BoreSize = parseFloat(0.88);
+
 
       $scope.order.Items = [];
     }
@@ -98,14 +124,17 @@ appMod.controller('NewOrdersController', ['$scope', function($scope) {
 
   <div ng-show="order.CompanyName && order.PONumber && order.PODate">
     <div class="row"><!-- showorder row -->
+    <div class="container">
+      
       <div ng-repeat="item in order.Items" class="row">
         <div class="row">
-          <span ng-bind="item.Type"></span>
-          <span ng-bind="item.Qty"></span>
-          <span ng-bind="item.Remarks"></span>
+          Type: <span ng-bind="item.Type"></span>
+          Qty: <span ng-bind="item.Qty"></span>
+          Remarks: <span ng-bind="item.Remarks"></span>
         </div>
       </div>
     </div>
+    </div><!-- showorder row -->
 
     <div class="row"><!-- orphan TCDie row -->
       <div class="col-xs-12"> <!-- Pellet Row -->
@@ -145,7 +174,7 @@ appMod.controller('NewOrdersController', ['$scope', function($scope) {
         <input ng-model="orphan.TCDO.Remarks" type="text" class="form-control" placeholder="Remarks if any..."></input>
       </div>
       <div class="col-xs-12">
-        <button class="form-control btn btn-info" ng-click="AddTcDieOrphanRowInOrder"> Add Order</button>
+        <button class="form-control btn btn-info" ng-click="AddTcDieOrphanRowInOrder()"> Add Order</button>
       </div>
     </div><!-- orphan TC Die row -->
     
