@@ -15,5 +15,5 @@ set PATH=%XDATDOCSDIR%\bin; %PATH%
 prompt [SDCRM]$P$_$_$G
 
 pushd %XDATDOCSDIR%\app
-color 80
+color 3B
 REM color code 80 might have to be changed if switched to new system.(BG=128/128/128, FG=0/43/54
