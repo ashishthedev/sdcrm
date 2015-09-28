@@ -26,11 +26,12 @@ var appMod = angular.module('crmapp', []);
 appMod.controller('NewOrdersController', ['$scope', function($scope) {
 
     function FetchCompanies(){
+    $scope.availableSuppliers = ["Standard", "Omega"];
     $scope.availableCompanies = ["Precision Drawell", "Mohinder"];
     }
     $scope.DefaultCasingTypes=["Straight", "Taper"];
     $scope.DefaultPelletSizes=["10x08", "13x10", "15x13", "17x15", "19x17", "22x18", "25x20", "30x24", "35x24"];
-    $scope.DefaultCasingSizes=["28x16", "28x20", "38x26", "40x28", "43x28", "50x35", "53x25", "70x40"];
+    $scope.DefaultCasingSizes=["28x16", "28x20", "38x26", "40x28", "43x28", "50x35", "53x35", "70x40"];
 
     $scope.DateChanged = function() {
     var today = new Date();
@@ -42,9 +43,20 @@ appMod.controller('NewOrdersController', ['$scope', function($scope) {
     $scope.order.PODateAsSeconds = JSDateToUnixTime($scope.order.PODate);
     }
 
-    $scope.removeOrderEntry = function(index){
-    $scope.order.Items.splice(index, 1);
+    $scope.updateTotalQty = function() {
+      var t = 0;
+      var items = $scope.order.Items;
+      for(i=0; i < items.length; i++) {
+        var item = items[i];
+        t += parseInt(item.Qty);
+      }
+      $scope.order.TotalQty = t;
     }
+    $scope.removeOrderEntry = function(index){
+      $scope.order.Items.splice(index, 1);
+      $scope.updateTotalQty();
+    }
+
     $scope.AddTcDieOrphanRowInOrder = function(){
       var items = $scope.order.Items;
       var o = $scope.orphan.TCDO;
@@ -59,6 +71,7 @@ appMod.controller('NewOrdersController', ['$scope', function($scope) {
       newItem.CasingSize = o.CasingSize;
       newItem.Qty = o.Qty;
       items.splice(items.length, 0, angular.copy(newItem));
+      $scope.updateTotalQty();
 
     }
 
@@ -73,25 +86,27 @@ appMod.controller('NewOrdersController', ['$scope', function($scope) {
       newItem.Remarks = o.Remarks;
       newItem.Qty = o.Qty;
       items.splice(items.length, 0, angular.copy(newItem));
-
+      $scope.updateTotalQty();
     }
 
     FetchCompanies();
 
+    $scope.order = {};
+    $scope.orphan = {};
+    $scope.orphan.Misc = {};
+    $scope.orphan.TCDO = {};
+    $scope.order.Items = [];
     if (Debug()){
-      $scope.order = {};
-      $scope.order.CompanyName = "Precision Drawell";
+      $scope.order.PurchaserName = "Precision Drawell";
+      $scope.order.SupplierName = "Standard";
       $scope.order.PODate = new Date();
       $scope.order.PONumber = "111";
 
-      $scope.orphan = {};
-      $scope.orphan.Misc = {};
       $scope.orphan.Misc.Remarks="Misc Remarks";
       $scope.orphan.Misc.Qty = parseInt(2);
       $scope.orphan.Misc.FriendlyName = "Boron Carbide";
       $scope.orphan.Misc.Unit = "gm";
 
-      $scope.orphan.TCDO = {};
       $scope.orphan.TCDO.Remarks="TCDO Remarks";
       $scope.orphan.TCDO.Qty = parseInt(10001);
       $scope.orphan.TCDO.FriendlyName = "TC Die";
@@ -101,8 +116,8 @@ appMod.controller('NewOrdersController', ['$scope', function($scope) {
       $scope.orphan.TCDO.BoreSize = parseFloat(0.88);
 
 
-      $scope.order.Items = [];
       $scope.AddTcDieOrphanRowInOrder();
+      $scope.updateTotalQty();
     }
 
 }]);
@@ -116,15 +131,27 @@ appMod.controller('NewOrdersController', ['$scope', function($scope) {
 </div>
 <div class="container">
   <div class="row"><!-- PO Global Details Row -->
-    <div class="col-xs-4">
-      <select ng-model="order.CompanyName" class="form-control" ng-options="k as k for k in availableCompanies"></select>
-      <div class="text-center">or</div>
-      <button class="form-control btn btn-warning">+ (TODO)</button>
+    <div class="col-xs-6">
+      <select ng-model="order.SupplierName" class="form-control" ng-options="k as k for k in availableSuppliers">
+        <option value='' disabled selected style='display:none;'>..........</option>
+      </select>
     </div>
-    <div class="col-xs-4">
+    <div class="col-xs-6">
+      <div class="row">
+        <div class="col-xs-12 col-sm-8">
+          <select ng-model="order.PurchaserName" class="form-control" ng-options="k as k for k in availableCompanies">
+            <option value='' disabled selected style='display:none;'>..........</option>
+          </select>
+        </div>
+        <div class="col-xs-12 col-sm-4">
+          <button class="form-control btn btn-link">+ (TODO)</button>
+        </div>
+      </div>
+    </div>
+    <div class="col-xs-6">
       <input ng-model="order.PONumber" type="text" class="form-control" placeholder="PO#"></input>
     </div>
-    <div class="col-xs-4">
+    <div class="col-xs-6 col-sm-4">
       <input required class="center-block" autofocus="true" title="PO Date" type="date" ng-model="order.PODate" ng-change="DateChanged()" />
       <div class="text-center" ng-bind="dateDiffFromTodayAsText"></div>
     </div>
@@ -132,57 +159,62 @@ appMod.controller('NewOrdersController', ['$scope', function($scope) {
 
   <hr>
 
-  <div ng-show="order.CompanyName && order.PONumber && order.PODate">
+  <div ng-show="order.SupplierName && order.PurchaserName && order.PONumber && order.PODate">
     <div><!-- showorder -->
-      <div ng-show="(order.Items.length > 0)" class="well">
-        <div class="panel panel-success">
-          <table class="table table-striped table-condensed panel-body">
-            <thead>
-              <tr>
-                <th>Item</th>
-                <th>Pellet</th>
-                <th>Casing</th>
-                <th>Type</th>
-                <th>Bore</th>
-                <th>Qty</th>
-                <th>Unit</th>
-                <th>Remarks</th>
-                <th></th>
+      <div ng-show="(order.Items.length > 0)"> <!-- ngshow order -->
+        <div class="well">
+          <div class="panel panel-success"> <!-- locked order panel -->
+            <table class="table table-striped table-condensed panel-body">
+              <thead>
+                <tr>
+                  <th>Item</th>
+                  <th>Pellet</th>
+                  <th>Casing</th>
+                  <th>Type</th>
+                  <th>Bore</th>
+                  <th>Qty</th>
+                  <th>Unit</th>
+                  <th>Remarks</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tfoot>
+                <tr>
+                  <td>Total:</td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td> <b><span ng-bind="order.TotalQty"></span></b> </td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                </tr>
+              </tfoot>
+              <tr ng-repeat="item in order.Items">
+                <td><span ng-bind="item.FriendlyName"></span></td>
+                <td><span ng-bind="item.PelletSize"></span></td>
+                <td><span ng-bind="item.CasingSize"></span></td>
+                <td><span ng-bind="item.CasingType"></span></td>
+                <td><span ng-bind="item.BoreSize"></span></td>
+                <td><span ng-bind="item.Qty"></span></td>
+                <td><span ng-bind="item.Unit"></span></td>
+                <td><span ng-bind="item.Remarks"></span></td>
+                <td><button ng-click="removeOrderEntry($index)" class="btn btn-sm btn-danger pull-right">X</button></td>
               </tr>
-            </thead>
-            <tfoot>
-              <tr>
-                <td>Total:</td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td> <b><span ng-bind="order.TotalQuantity"></span></b> </td>
-                <td></td>
-                <td></td>
-                <td></td>
-              </tr>
-            </tfoot>
-            <tr ng-repeat="item in order.Items">
-              <td><span ng-bind="item.FriendlyName"></span></td>
-              <td><span ng-bind="item.PelletSize"></span></td>
-              <td><span ng-bind="item.CasingSize"></span></td>
-              <td><span ng-bind="item.CasingType"></span></td>
-              <td><span ng-bind="item.BoreSize"></span></td>
-              <td><span ng-bind="item.Qty"></span></td>
-              <td><span ng-bind="item.Unit"></span></td>
-              <td><span ng-bind="item.Remarks"></span></td>
-              <td><button ng-click="removeOrderEntry($index)" class="btn btn-sm btn-danger pull-right">X</button></td>
-            </tr>
 
-          </table>
-        </div>
-        <div class="row">
-          <div class="col-xs-12">
-            <button ng-click="submitOrder()" class="col-xs-12 btn btn-lg btn-success pull-right">Punch Order</button>
+            </table>
+          </div> <!-- locked order panel -->
+          <div class="row">
+            <div class="col-xs-12">
+              <button ng-click="submitOrder()" class="btn btn-lg btn-info btn-block">Punch Order</button>
+            </div>
           </div>
         </div>
-      </div>
+
+        <hr>
+
+      </div> <!--ngshow order -->
     </div><!-- showorder -->
 
     <form ng-submit="AddTcDieOrphanRowInOrder()">
@@ -191,11 +223,11 @@ appMod.controller('NewOrdersController', ['$scope', function($scope) {
           <div class="row">
             <div class="col-xs-10">
               <select ng-model="orphan.TCDO.PelletSize" class="form-control" ng-options="k as k for k in DefaultPelletSizes">
-                <option value='' disabled selected style='display:none;'>Pellet Size...</option>
+                <option value='' disabled selected style='display:none;'>..........</option>
               </select>
             </div>
             <div class="col-xs-2">
-              <button  class="form-control btn btn-warning"> + (TODO)</button>
+              <a class="form-control btn btn-link"> + (TODO)</a>
             </div>
           </div>
         </div> <!-- Pellet Row -->
@@ -203,16 +235,25 @@ appMod.controller('NewOrdersController', ['$scope', function($scope) {
           <div class="row">
             <div class="col-xs-10">
               <select ng-model="orphan.TCDO.CasingSize" class="form-control" ng-options="k as k for k in DefaultCasingSizes">
-                <option value='' disabled selected style='display:none;'>Casing Size</option>
+                <option value='' disabled selected style='display:none;'>..........</option>
               </select>
             </div>
             <div class="col-xs-2">
-              <button  class="form-control btn btn-warning"> + (TODO)</button>
+              <a class="form-control btn btn-link" ng-click="CreateCasingSize()"> + (TODO)</a>
             </div>
           </div>
         </div><!-- Casing Row -->
-        <div class="col-xs-12">
-          <select ng-model="orphan.TCDO.CasingType" type="text" class="form-control" ng-options="k as k for k in DefaultCasingTypes" placeholder="Straight"></select>
+        <div class="col-xs-6">
+          <label>
+            <input type="radio" ng-model="orphan.TCDO.CasingType" value="Straight">
+            Straight
+          </label>
+        </div>
+        <div class="col-xs-6">
+          <label>
+            <input type="radio" ng-model="orphan.TCDO.CasingType"value="Taper">
+            Taper
+          </label>
         </div>
         <div class="col-xs-12">
           <input required ng-model="orphan.TCDO.BoreSize" type="number" class="form-control" step=".01" placeholder="Bore"></input>
@@ -223,12 +264,13 @@ appMod.controller('NewOrdersController', ['$scope', function($scope) {
         <div class="col-xs-12">
           <input ng-model="orphan.TCDO.Remarks" type="text" class="form-control" placeholder="Remarks if any..."></input>
         </div>
-        <div class="col-xs-12">
-          <button class="form-control btn btn-info"> Add Order</button>
+        <div class="row">
+          <div class="col-xs-12 col-sm-offset-2 col-sm-8">
+            <button class="form-control btn btn-warning btn-mini btn-block">Add Die Order</button>
+          </div>
         </div>
       </div><!-- orphan TC Die row -->
     </form>
-
 
     <hr>
 
@@ -254,8 +296,8 @@ appMod.controller('NewOrdersController', ['$scope', function($scope) {
             </div>
           </div>
           <div class="row">
-            <div class="col-xs-12">
-              <button class="form-control btn btn-info"> Add Misc Order</button>
+            <div class="col-xs-12 col-sm-offset-2 col-sm-8">
+              <button class="form-control btn btn-warning btn-mini btn-block"> Add Misc Order</button>
             </div>
           </div>
         </div>
