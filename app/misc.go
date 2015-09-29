@@ -1,4 +1,4 @@
-package TODO
+package sdatcrm
 
 import (
 	"appengine"
@@ -47,19 +47,16 @@ func Reverse(s string) string {
 	return string(runes)
 }
 
-func BranchName(r *http.Request) string {
+func BranchName(c appengine.Context) string {
 	if appengine.IsDevAppServer() {
 		return "localhost"
 	}
-	host := r.URL.Host
-	if host == "" {
-		panic("Host is empty. A lot depends upon the host of the URL")
+
+	branchName := strings.Split(appengine.VersionID(c), ".")[0]
+	if len(branchName) > 0 {
+		return branchName
 	}
-	s := strings.Split(strings.ToLower(host), ".")[0]
-	if len(s) > 0 {
-		return s
-	}
-	return host
+	return "unkown"
 }
 
 func IsLocalHostedOrOnDevBranch(r *http.Request) bool {
@@ -117,7 +114,7 @@ func _SEWNewKey(kind string, stringId string, numericID int64, r *http.Request) 
 	//to only that silo. For ex/- demo.sew.appspot.com should only effect "demo"
 	//silo and not the live version data.
 
-	ancestorKey := datastore.NewKey(c, "ANCESTOR_KEY", BranchName(r), 0, nil)
+	ancestorKey := datastore.NewKey(c, "ANCESTOR_KEY", BranchName(c), 0, nil)
 	return datastore.NewKey(c, kind, stringId, numericID, ancestorKey)
 }
 

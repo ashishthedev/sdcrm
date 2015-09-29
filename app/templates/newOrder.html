@@ -96,8 +96,8 @@ appMod.controller('NewOrdersController', ['$scope', 'ORDERS', function($scope, O
     }
 
     $scope.punchOrder = function() {
-      ORDERS.save($scope.order).$promise.then(function(status){
-        $scope.statusNote = status;
+      ORDERS.save($scope.order).$promise.then(function(order){
+          $scope.statusNote = "Order saved with id: " + order.Id;
       });
     }
 
@@ -219,7 +219,7 @@ appMod.controller('NewOrdersController', ['$scope', 'ORDERS', function($scope, O
             </table>
           </div> <!-- locked order panel -->
           <div class="row">
-            <div class="col-xs-12">
+            <div class="col-xs-12 col-sm-offset-2 col-sm-8">
               <button ng-click="punchOrder()" class="btn btn-lg btn-info btn-block">Punch Order</button>
             </div>
           </div>
@@ -277,16 +277,13 @@ appMod.controller('NewOrdersController', ['$scope', 'ORDERS', function($scope, O
         <div class="col-xs-12">
           <input ng-model="orphan.TCDO.Remarks" type="text" class="form-control" placeholder="Remarks if any..."></input>
         </div>
-        <div class="row">
-          <div class="col-xs-12 col-sm-offset-2 col-sm-8">
-            <button class="form-control btn btn-warning btn-mini btn-block">Add Die Order</button>
-          </div>
-        </div>
+            <div class="col-xs-12">
+              <button class="form-control btn btn-warning btn-mini btn-block">Add Die Order</button>
+            </div>
       </div><!-- orphan TC Die row -->
     </form>
 
     <hr>
-
 
     <form ng-submit="AddMiscOrphanRowInOrder()">
       <div class="row"><!-- orphan Misc row -->
@@ -309,8 +306,8 @@ appMod.controller('NewOrdersController', ['$scope', 'ORDERS', function($scope, O
             </div>
           </div>
           <div class="row">
-            <div class="col-xs-12 col-sm-offset-2 col-sm-8">
-              <button class="form-control btn btn-warning btn-mini btn-block"> Add Misc Order</button>
+            <div class="col-xs-12">
+              <button class="form-control btn btn-warning btn-mini btn-block">Add Misc Order</button>
             </div>
           </div>
         </div>

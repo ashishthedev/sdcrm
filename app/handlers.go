@@ -1,27 +1,27 @@
-package TODO
+package sdatcrm
 
 import (
 	"appengine"
-	"fmt"
+	"encoding/json"
 	"html/template"
 	"net/http"
 )
 
-type gaeHandler func(c appengine.Context, w http.ResponseWriter, r *http.Request) error
+type gaeHandler func(c appengine.Context, w http.ResponseWriter, r *http.Request) (interface{}, error)
 
 func (h gaeHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	c := appengine.NewContext(r)
-	if err := h(c, w, r); err != nil {
+	val, err := h(c, w, r)
+	if err == nil {
+		err = json.NewEncoder(w).Encode(val)
+	}
+	if err != nil {
 		c.Errorf("%v", err.Error())
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
 
 func Orders(c appengine.Context, w http.ResponseWriter, r *http.Request) error {
-	return nil
-}
-func helloworld(c appengine.Context, w http.ResponseWriter, r *http.Request) error {
-	fmt.Fprintf(w, "Hello world2")
 	return nil
 }
 
@@ -59,8 +59,6 @@ func initStaticAdminHTMLUrlMaps() {
 }
 
 func initStaticHTMLUrlMaps() {
-	http.Handle("/hello", gaeHandler(helloworld))
-
 	urlMaps := map[string]urlStruct{
 		"/newOrder": {generalPageHandler, "templates/newOrder.html"},
 	}
