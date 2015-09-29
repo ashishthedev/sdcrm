@@ -136,8 +136,8 @@ func CMN_SEWNewKey(kind string, stringId string, numericID int64, r *http.Reques
 	return _SEWNewKey(kind, COMMON_PREFIX+stringId, numericID, r)
 }
 
-func WriteJson(w *http.ResponseWriter, i interface{}) error {
-	return json.NewEncoder(*w).Encode(i)
+func WriteJson(w http.ResponseWriter, i interface{}) error {
+	return json.NewEncoder(w).Encode(i)
 }
 
 func fromJson(v []byte, vv interface{}) error {

@@ -117,6 +117,6 @@ func apiNotImplementedHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func echoAPIHandler(w http.ResponseWriter, r *http.Request) {
-	WriteJson(&w, "test")
+	WriteJson(w, "test")
 	return
 }
