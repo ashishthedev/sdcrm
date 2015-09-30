@@ -28,6 +28,7 @@ func Orders(c appengine.Context, w http.ResponseWriter, r *http.Request) error {
 type urlStruct struct {
 	handler      func(w http.ResponseWriter, r *http.Request)
 	templatePath string
+	data         interface{}
 }
 
 type apiStruct struct {
@@ -37,40 +38,34 @@ type apiStruct struct {
 var urlMaps map[string]urlStruct
 var apiMaps map[string]apiStruct
 
-var PRE_BUILT_TEMPLATES = make(map[string]*template.Template)
+type TEMPLATE_AND_DATA struct {
+	t    *template.Template
+	data interface{}
+}
+
+var PRE_BUILT_TEMPLATES_WITH_DATA = make(map[string]TEMPLATE_AND_DATA)
 var PAGE_NOT_FOUND_TEMPLATE = template.Must(template.ParseFiles("templates/pageNotFound.html"))
 
 func initDynamicHTMLUrlMaps() {
 	http.HandleFunc("/dynamic", apiNotImplementedHandler)
 }
 
-func initStaticAdminHTMLUrlMaps() {
-	urlMaps := map[string]urlStruct{}
-
-	for path, urlBlob := range urlMaps {
-		templatePath := urlBlob.templatePath
-		PRE_BUILT_TEMPLATES[path] = template.Must(template.ParseFiles(templatePath))
-	}
-
-	for path, urlBlob := range urlMaps {
-		http.HandleFunc(path, urlBlob.handler)
-	}
-	return
-}
-
 func initStaticHTMLUrlMaps() {
 	urlMaps := map[string]urlStruct{
-		"/newOrder": {generalPageHandler, "templates/newOrder.html"},
+		"/order/new": {generalPageHandler, "templates/newOrder.html", struct{ Nature string }{"NEW"}},
+		"/orders":    {generalPageHandler, "templates/allOrders.html", nil},
 	}
 
 	for path, urlBlob := range urlMaps {
 		templatePath := urlBlob.templatePath
-		PRE_BUILT_TEMPLATES[path] = template.Must(template.ParseFiles(templatePath))
+		data := urlBlob.data
+		PRE_BUILT_TEMPLATES_WITH_DATA[path] = TEMPLATE_AND_DATA{template.Must(template.ParseFiles(templatePath)), data}
 	}
 
 	for path, urlBlob := range urlMaps {
 		http.HandleFunc(path, urlBlob.handler)
 	}
+	http.HandleFunc("/order/", editOrderPageHandler)
 	return
 }
 
@@ -91,18 +86,35 @@ func initRootApiMaps() {
 func init() {
 	initRootApiMaps()
 	initStaticHTMLUrlMaps()
-	initStaticAdminHTMLUrlMaps()
 	initDynamicHTMLUrlMaps()
 	return
 }
 
-func generalPageHandler(w http.ResponseWriter, r *http.Request) {
-	t := PRE_BUILT_TEMPLATES[r.URL.Path]
+func editOrderPageHandler(w http.ResponseWriter, r *http.Request) {
+	t := template.Must(template.ParseFiles("templates/newOrder.html"))
+	var data interface{}
+	data = struct{ Nature string }{"EDIT"}
 	if t == nil {
 		t = PAGE_NOT_FOUND_TEMPLATE
+		data = nil
 	}
 
-	if err := t.Execute(w, nil); err != nil {
+	if err := t.Execute(w, data); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	return
+}
+
+func generalPageHandler(w http.ResponseWriter, r *http.Request) {
+	t := PRE_BUILT_TEMPLATES_WITH_DATA[r.URL.Path].t
+	data := PRE_BUILT_TEMPLATES_WITH_DATA[r.URL.Path].data
+	if t == nil {
+		t = PAGE_NOT_FOUND_TEMPLATE
+		data = nil
+	}
+
+	if err := t.Execute(w, data); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

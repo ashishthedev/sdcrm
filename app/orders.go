@@ -15,6 +15,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -32,26 +33,40 @@ type Item struct {
 	Qty          int64   `json:"Qty"`
 }
 
+type OrderId int64
+type ShipmentId int64
+
 type Order struct {
-	Id            int64     `json:"Id" datastore:"-"`
-	Items         []Item    `json:"Items"`
-	Created       time.Time `json:"Created"`
-	PODate        time.Time `json:"PODate"`
-	TotalQty      int64     `json:"TotalQty"`
-	PurchaserName string    `json:"PurchaserName"`
-	SupplierName  string    `json:"SupplierName"`
-	PONumber      string    `json:"PONumber"`
-	Done          bool      `json:"Done"`
+	Id            OrderId      `json:"Id" datastore:"-"`
+	Items         []Item       `json:"Items"`
+	Created       time.Time    `json:"Created"`
+	PODate        time.Time    `json:"PODate"`
+	TotalQty      int64        `json:"TotalQty"`
+	PurchaserName string       `json:"PurchaserName"`
+	SupplierName  string       `json:"SupplierName"`
+	PONumber      string       `json:"PONumber"`
+	Pending       bool         `json:"Pending"`
+	ShipmentsId   []ShipmentId `json:"ShipmentsId"`
 }
 
 func init() {
-	http.Handle(ORDERS_API, gaeHandler(orderWithID))
+	http.Handle(ORDERS_API, gaeHandler(orderHandler))
 }
 
-func orderWithID(c appengine.Context, w http.ResponseWriter, r *http.Request) (interface{}, error) {
+func orderHandler(c appengine.Context, w http.ResponseWriter, r *http.Request) (interface{}, error) {
 	oid := r.URL.Path[len(ORDERS_API):]
 	c.Errorf("Received oid %v", oid)
 	if len(oid) > 0 {
+		switch r.Method {
+		case "GET":
+			oid64, err := strconv.ParseInt(oid, 10, 64)
+			if err != nil {
+				return nil, err
+			}
+			order := new(Order)
+			order.Id = OrderId(oid64)
+			return order.get(c)
+		}
 	} else {
 		switch r.Method {
 		case "POST":
@@ -60,6 +75,8 @@ func orderWithID(c appengine.Context, w http.ResponseWriter, r *http.Request) (i
 				return nil, err
 			}
 			return order.save(c)
+		case "GET":
+			return getAllOrders(c)
 		default:
 			return nil, fmt.Errorf(r.Method + " on " + r.URL.Path + " not implemented")
 		}
@@ -74,16 +91,23 @@ func decodeOrder(r io.ReadCloser) (*Order, error) {
 	return &order, err
 }
 
+func (o *Order) get(c appengine.Context) (*Order, error) {
+	err := datastore.Get(c, o.key(c), o)
+	if err != nil {
+		return nil, err
+	}
+	return o, nil
+}
 func (o *Order) save(c appengine.Context) (*Order, error) {
 	k, err := datastore.Put(c, o.key(c), o)
 	if err != nil {
 		return nil, err
 	}
-	o.Id = k.IntID()
+	o.Id = OrderId(k.IntID())
 	return o, nil
 }
 
-func defaultOrdersList(c appengine.Context) *datastore.Key {
+func defaultOrderList(c appengine.Context) *datastore.Key {
 	ancestorKey := datastore.NewKey(c, "ANCESTOR_KEY", BranchName(c), 0, nil)
 	return datastore.NewKey(c, "OrderList", "default", 0, ancestorKey)
 }
@@ -91,7 +115,19 @@ func defaultOrdersList(c appengine.Context) *datastore.Key {
 func (o *Order) key(c appengine.Context) *datastore.Key {
 	if o.Id == 0 {
 		o.Created = time.Now()
-		return datastore.NewIncompleteKey(c, "Order", defaultOrdersList(c))
+		return datastore.NewIncompleteKey(c, "Order", defaultOrderList(c))
 	}
-	return datastore.NewKey(c, "Order", "", o.Id, defaultOrdersList(c))
+	return datastore.NewKey(c, "Order", "", int64(o.Id), defaultOrderList(c))
+}
+
+func getAllOrders(c appengine.Context) ([]Order, error) {
+	orders := []Order{}
+	ks, err := datastore.NewQuery("Order").Ancestor(defaultOrderList(c)).Order("Created").GetAll(c, &orders)
+	if err != nil {
+		return nil, err
+	}
+	for i := 0; i < len(orders); i++ {
+		orders[i].Id = OrderId(ks[i].IntID())
+	}
+	return orders, nil
 }

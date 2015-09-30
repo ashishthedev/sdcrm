@@ -1,7 +1,11 @@
 <!DOCTYPE html>
 <html>
 <head>
+{{ if eq .Nature "NEW" }}
 <title>NewOrder</title>
+{{ else if eq .Nature "EDIT" }}
+<title>EditOrder</title>
+{{ end }}
 <script src="/static/lib/angular/angular.min.js"></script>
 <script src="/static/lib/angular/angular-resource.min.js"></script>
 <script src="/static/js/script.js"></script>
@@ -25,11 +29,12 @@
 <script>
 var appMod = angular.module('crmapp', ['services']);
 appMod.config(['$resourceProvider', function($resourceProvider) {
-  // Don't strip trailing slashes from calculated URLs
-  $resourceProvider.defaults.stripTrailingSlashes = false;
-}]);
+    // Don't strip trailing slashes from calculated URLs
+    $resourceProvider.defaults.stripTrailingSlashes = false;
+    }]);
 
 appMod.controller('NewOrdersController', ['$scope', 'ORDERS', function($scope, ORDERS) {
+    var NewOrEdit = {{.Nature }};
 
     function FetchCompanies(){
     $scope.availableSuppliers = ["Standard", "Omega"];
@@ -40,13 +45,13 @@ appMod.controller('NewOrdersController', ['$scope', 'ORDERS', function($scope, O
     $scope.DefaultCasingSizes=["28x16", "28x20", "38x26", "40x28", "43x28", "50x35", "53x35", "70x40"];
 
     $scope.DateChanged = function() {
-      var today = new Date();
-      if (today < $scope.order.PODate) {
-        $scope.order.PODate = today;
-      }
+    var today = new Date();
+    if (today < $scope.order.PODate) {
+    $scope.order.PODate = today;
+    }
 
-      $scope.dateDiffFromTodayAsText = GetDateDiffAsText($scope.order.PODate);
-      $scope.order.PODateAsSeconds = JSDateToUnixTime($scope.order.PODate);
+    $scope.dateDiffFromTodayAsText = GetDateDiffAsText($scope.order.PODate);
+    $scope.order.PODateAsSeconds = JSDateToUnixTime($scope.order.PODate);
     }
 
     $scope.updateTotalQty = function() {
@@ -98,39 +103,55 @@ appMod.controller('NewOrdersController', ['$scope', 'ORDERS', function($scope, O
     $scope.punchOrder = function() {
       ORDERS.save($scope.order).$promise.then(function(order){
           $scope.statusNote = "Order saved with id: " + order.Id;
-      });
+          });
     }
 
     FetchCompanies();
 
-    $scope.order = {};
-    $scope.orphan = {};
-    $scope.orphan.Misc = {};
-    $scope.orphan.TCDO = {};
-    $scope.order.Items = [];
-    if (Debug()){
-      $scope.order.PurchaserName = "Precision Drawell";
-      $scope.order.SupplierName = "Standard";
-      $scope.order.PODate = new Date();
-      $scope.order.PONumber = "111";
+    init();
 
-      $scope.orphan.Misc.Remarks="Misc Remarks";
-      $scope.orphan.Misc.Qty = parseInt(2);
-      $scope.orphan.Misc.FriendlyName = "Boron Carbide";
-      $scope.orphan.Misc.Unit = "gm";
+    function init(){
+      $scope.order = {};
+      $scope.orphan = {};
+      $scope.orphan.Misc = {};
+      $scope.orphan.TCDO = {};
+      $scope.order.Items = [];
 
-      $scope.orphan.TCDO.Remarks="TCDO Remarks";
-      $scope.orphan.TCDO.Qty = parseInt(10001);
-      $scope.orphan.TCDO.FriendlyName = "TC Die";
-      $scope.orphan.TCDO.PelletSize = "10x08";
-      $scope.orphan.TCDO.CasingSize = "28x20";
-      $scope.orphan.TCDO.CasingType = "Straight";
-      $scope.orphan.TCDO.BoreSize = parseFloat(0.88);
+      if(NewOrEdit == "NEW"){
+        if (Debug()){
+          $scope.order.PurchaserName = "Precision Drawell";
+          $scope.order.SupplierName = "Standard";
+          $scope.order.PODate = new Date();
+          $scope.order.PONumber = "111";
+
+          $scope.orphan.Misc.Remarks="Misc Remarks";
+          $scope.orphan.Misc.Qty = parseInt(2);
+          $scope.orphan.Misc.FriendlyName = "Boron Carbide";
+          $scope.orphan.Misc.Unit = "gm";
+
+          $scope.orphan.TCDO.Remarks="TCDO Remarks";
+          $scope.orphan.TCDO.Qty = parseInt(10001);
+          $scope.orphan.TCDO.FriendlyName = "TC Die";
+          $scope.orphan.TCDO.PelletSize = "10x08";
+          $scope.orphan.TCDO.CasingSize = "28x20";
+          $scope.orphan.TCDO.CasingType = "Straight";
+          $scope.orphan.TCDO.BoreSize = parseFloat(0.88);
 
 
-      $scope.AddTcDieOrphanRowInOrder();
-      $scope.updateTotalQty();
+          $scope.AddTcDieOrphanRowInOrder();
+          $scope.updateTotalQty();
+        }
+      }
+      if (NewOrEdit == "EDIT"){
+        orderId = document.URL.split("/")[4];
+        ORDERS.get({id: orderId}).$promise.then(function(order){
+            $scope.order = order;
+            $scope.order.PODate = new Date(order.PODate);
+            }, function(error){
+            });
+      }
     }
+
 
 }]);
 
@@ -139,7 +160,11 @@ appMod.controller('NewOrdersController', ['$scope', 'ORDERS', function($scope, O
 <body ng-app="crmapp" ng-controller="NewOrdersController">
 <div class="well">
   <a href="/"><img class="center-block" src="/static/img/57.png" /></a>
+  {{ if eq .Nature "NEW" }}
   <h1 class="text-center">New Order</h1>
+  {{ else if eq .Nature "EDIT" }}
+  <h1 class="text-center">Edit Order</h1>
+  {{ end }}
   <div id="statusNote" ng-bind="statusNote"></div>
 </div>
 <div class="container">
@@ -277,9 +302,9 @@ appMod.controller('NewOrdersController', ['$scope', 'ORDERS', function($scope, O
         <div class="col-xs-12">
           <input ng-model="orphan.TCDO.Remarks" type="text" class="form-control" placeholder="Remarks if any..."></input>
         </div>
-            <div class="col-xs-12">
-              <button class="form-control btn btn-warning btn-mini btn-block">Add Die Order</button>
-            </div>
+        <div class="col-xs-12">
+          <button class="form-control btn btn-warning btn-mini btn-block">Add Die Order</button>
+        </div>
       </div><!-- orphan TC Die row -->
     </form>
 

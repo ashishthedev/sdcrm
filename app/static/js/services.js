@@ -8,5 +8,6 @@ services.factory('BOM', ['$resource', function($resource){
   }]);
 
 services.factory('ORDERS', ['$resource', function($resource){
-    return $resource('/api/orders/:id',{},{});
+    return $resource('/api/orders/:id',{},{
+    });
   }]);
