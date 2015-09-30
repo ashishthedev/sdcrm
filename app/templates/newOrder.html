@@ -103,6 +103,8 @@ appMod.controller('NewOrdersController', ['$scope', 'ORDERS', function($scope, O
     $scope.punchOrder = function() {
       ORDERS.save($scope.order).$promise.then(function(order){
           $scope.statusNote = "Order saved with id: " + order.Id;
+          }, function(error){
+          $scope.statusNote = error.status + ": " + error.data;
           });
     }
 
@@ -143,11 +145,12 @@ appMod.controller('NewOrdersController', ['$scope', 'ORDERS', function($scope, O
         }
       }
       if (NewOrEdit == "EDIT"){
-        orderId = document.URL.split("/")[4];
+        orderId = document.URL.split("/")[3];
         ORDERS.get({id: orderId}).$promise.then(function(order){
             $scope.order = order;
             $scope.order.PODate = new Date(order.PODate);
             }, function(error){
+            $scope.statusNote = error.status + ": " + error.data;
             });
       }
     }
