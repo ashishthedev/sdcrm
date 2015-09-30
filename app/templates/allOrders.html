@@ -35,9 +35,17 @@ appMod.config(function($interpolateProvider) {
     });
 appMod.controller('AllOrdersController', ['$scope', 'ORDERS', function($scope, ORDERS) {
 
+    function init(){
+
+    $scope.working = true;
     ORDERS.query().$promise.then(function(orders){
+    $scope.working = false;
       $scope.orders = orders;
+      }, function(error){
+      $scope.statusNote = error.status + ": " + error.data;
       });
+    }
+    init()
 
     }]);
 
@@ -49,12 +57,18 @@ appMod.controller('AllOrdersController', ['$scope', 'ORDERS', function($scope, O
   <h1 class="text-center">All Orders</h1>
   <div id="statusNote" ng-bind="statusNote"></div>
 </div>
-<div class="container">
-  <div ng-repeat="o in orders">
-    <div class="row">
-      <a href="/order/||o.Id||"><span ng-bind="o.Id"></span></a>
+<div ng-show="working"> <!-- show=working -->
+  <img class="center-block" src="/static/img/working.gif" />
+</div> <!-- show=working -->
+
+<div ng-show="!working"> <!-- show=!working -->
+  <div class="container">
+    <div ng-repeat="o in orders">
+      <div class="row">
+        <a href="/order/||o.Id||"><span ng-bind="o.Id"></span></a>
+      </div>
     </div>
-  </div>
-</div> <!-- container -->
+  </div> <!-- container -->
+</div> <!-- show=!working -->
 </body>
 </html>
