@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html>
+<head>
+{{ if eq .Nature "NEW" }}
+<title>PunchInvoice</title>
+{{ else if eq .Nature "EDIT" }}
+<title>EditInvoice</title>
+{{ end }}
+<script src="/static/lib/angular/angular.min.js"></script>
+<script src="/static/lib/angular/angular-resource.min.js"></script>
+<script src="/static/js/script.js"></script>
+<script src="/static/js/services.js"></script>
+
+<!-- Standard Favicon -->
+<link rel="icon" type="image/x-icon" href="/static/img/favicon.ico" />
+
+<!-- For iPhone 4 Retina display: -->
+<link rel="apple-touch-icon-precomposed" sizes="114x114" href="/static/img/114.png">
+
+<!-- For iPad: -->
+<link rel="apple-touch-icon-precomposed" sizes="72x72" href="/static/img/72.png">
+
+<!-- For iPhone: -->
+<link rel="apple-touch-icon-precomposed" href="/static/img/57.png">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=yes">
+<link rel="stylesheet" href="/static/css/bootstrap.min.css" type="text/css" >
+<link rel="stylesheet" href="/static/css/bs_modified.css" type="text/css" >
+<script>
+var appMod = angular.module('crmapp', ['services']);
+appMod.config(['$resourceProvider', function($resourceProvider) {
+    // Don't strip trailing slashes from calculated URLs
+    $resourceProvider.defaults.stripTrailingSlashes = false;
+    }]);
+
+appMod.controller('NewInvoicesController', ['$scope', 'ORDERS', function($scope, ORDERS) {
+    var NewOrEdit = {{.Nature }};
+
+    function FetchCompanies(){
+    $scope.availableSuppliers = ["Standard", "Omega"];
+    $scope.availableCompanies = ["Precision Drawell", "Mohinder"];
+    }
+    $scope.DefaultCasingTypes=["Straight", "Taper"];
+    $scope.DefaultPelletSizes=["10x08", "13x10", "15x13", "17x15", "19x17", "22x18", "25x20", "30x24", "35x24"];
+    $scope.DefaultCasingSizes=["28x16", "28x20", "38x26", "40x28", "43x28", "50x35", "53x35", "70x40"];
+
+    $scope.DateChanged = function() {
+    var today = new Date();
+    if (today < $scope.order.PODate) {
+    $scope.order.PODate = today;
+    }
+
+    $scope.dateDiffFromTodayAsText = GetDateDiffAsText($scope.order.PODate);
+    $scope.order.PODateAsSeconds = JSDateToUnixTime($scope.order.PODate);
+    }
+
+    $scope.updateTotalQty = function() {
+      var t = 0;
+      var items = $scope.order.Items;
+      for(i=0; i < items.length; i++) {
+        var item = items[i];
+        t += parseInt(item.Qty);
+      }
+      $scope.order.TotalQty = t;
+    }
+    $scope.removeInvoiceEntry = function(index){
+      $scope.order.Items.splice(index, 1);
+      $scope.updateTotalQty();
+    }
+
+    $scope.AddTcDieOrphanRowInInvoice = function(){
+      var items = $scope.order.Items;
+      var o = $scope.orphan.TCDO;
+      var newItem = {};
+      newItem.Type = "TCD";
+      newItem.FriendlyName = "TCDie";
+      newItem.Remarks = o.Remarks;
+      newItem.PelletSize = o.PelletSize;
+      newItem.Unit = "pc";
+      newItem.BoreSize = o.BoreSize;
+      newItem.CasingType = o.CasingType;
+      newItem.CasingSize = o.CasingSize;
+      newItem.Qty = o.Qty;
+      items.splice(items.length, 0, angular.copy(newItem));
+      $scope.updateTotalQty();
+
+    }
+
+
+    $scope.AddMiscOrphanRowInInvoice = function(){
+      var items = $scope.order.Items;
+      var o = $scope.orphan.Misc;
+      var newItem = {};
+      newItem.Type = "Misc"
+        newItem.Unit = o.Unit;
+      newItem.FriendlyName = o.FriendlyName;
+      newItem.Remarks = o.Remarks;
+      newItem.Qty = o.Qty;
+      items.splice(items.length, 0, angular.copy(newItem));
+      $scope.updateTotalQty();
+    }
+
+    $scope.punchInvoice = function() {
+      $scope.working = true;
+      ORDERS.save($scope.order).$promise.then(function(order){
+          $scope.statusNote = "Invoice saved with id: " + order.Id;
+          window.location = "/order/" + order.Id;
+          }, function(error){
+          $scope.statusNote = error.status + ": " + error.data;
+          $scope.working = false;
+          });
+    }
+
+    FetchCompanies();
+
+    init();
+
+    function init(){
+      $scope.order = {};
+      $scope.orphan = {};
+      $scope.orphan.Misc = {};
+      $scope.orphan.TCDO = {};
+      $scope.order.Items = [];
+
+      if(NewOrEdit == "NEW"){
+        $scope.order.PODate = new Date();
+        if (Debug()){
+          $scope.order.PurchaserName = "Precision Drawell";
+          $scope.order.SupplierName = "Standard";
+          $scope.order.PODate = new Date();
+          $scope.order.PONumber = "111";
+
+          $scope.orphan.Misc.Remarks="Misc Remarks";
+          $scope.orphan.Misc.Qty = parseInt(2);
+          $scope.orphan.Misc.FriendlyName = "Boron Carbide";
+          $scope.orphan.Misc.Unit = "gm";
+
+          $scope.orphan.TCDO.Remarks="TCDO Remarks";
+          $scope.orphan.TCDO.Qty = parseInt(10001);
+          $scope.orphan.TCDO.FriendlyName = "TC Die";
+          $scope.orphan.TCDO.PelletSize = "10x08";
+          $scope.orphan.TCDO.CasingSize = "28x20";
+          $scope.orphan.TCDO.CasingType = "Straight";
+          $scope.orphan.TCDO.BoreSize = parseFloat(0.88);
+
+
+          $scope.AddTcDieOrphanRowInInvoice();
+          $scope.updateTotalQty();
+        }
+      }
+      if (NewOrEdit == "EDIT"){
+        $scope.working = true;
+        orderId = document.URL.split("/")[4];
+        ORDERS.get({id: orderId}).$promise.then(function(order){
+            $scope.order = order;
+            $scope.order.PODate = new Date(order.PODate);
+            $scope.working = false;
+            }, function(error){
+            $scope.statusNote = error.status + ": " + error.data;
+            $scope.working = false;
+            });
+      }
+    }
+
+
+}]);
+
+</script>
+</head>
+<body ng-app="crmapp" ng-controller="NewInvoicesController">
+<div class="well">
+  <a href="/"><img class="center-block" src="/static/img/57.png" /></a>
+  {{ if eq .Nature "NEW" }}
+  <h1 class="text-center">Punch Invoice</h1>
+  {{ else if eq .Nature "EDIT" }}
+  <h1 class="text-center">Edit Invoice</h1>
+  {{ end }}
+  <div id="statusNote" ng-bind="statusNote"></div>
+</div>
+<div ng-show="working"> <!-- show=working -->
+  <img class="center-block" src="/static/img/working.gif" />
+</div> <!-- show=working -->
+
+<div ng-show="!working"> <!-- show=!working -->
+  <div class="container">
+    <div class="row"><!-- PO Global Details Row -->
+      <div class="col-xs-6">
+        <select ng-model="order.SupplierName" class="form-control" ng-options="k as k for k in availableSuppliers">
+          <option value='' disabled selected style='display:none;'>..........</option>
+        </select>
+      </div>
+      <div class="col-xs-6">
+        <div class="row">
+          <div class="col-xs-12 col-sm-8">
+            <select ng-model="order.PurchaserName" class="form-control" ng-options="k as k for k in availableCompanies">
+              <option value='' disabled selected style='display:none;'>..........</option>
+            </select>
+          </div>
+          <div class="col-xs-12 col-sm-4">
+            <button class="form-control btn btn-link">+ (TODO)</button>
+          </div>
+        </div>
+      </div>
+      <div class="col-xs-6">
+        <input ng-model="order.PONumber" type="text" class="form-control" placeholder="PO#"></input>
+      </div>
+      <div class="col-xs-6 col-sm-4">
+        <input required class="center-block" autofocus="true" title="PO Date" type="date" ng-model="order.PODate" ng-change="DateChanged()" />
+        <div class="text-center" ng-bind="dateDiffFromTodayAsText"></div>
+      </div>
+    </div><!-- PO Global Details Row -->
+
+    <hr>
+
+    <div ng-show="order.SupplierName && order.PurchaserName && order.PONumber && order.PODate">
+      <div><!-- showorder -->
+        <div ng-show="(order.Items.length > 0)"> <!-- ngshow order -->
+          <div class="well">
+            <div class="panel panel-success"> <!-- locked order panel -->
+              <table class="table table-striped table-condensed panel-body">
+                <thead>
+                  <tr>
+                    <th>Item</th>
+                    <th>Pellet</th>
+                    <th>Casing</th>
+                    <th>Type</th>
+                    <th>Bore</th>
+                    <th>Qty</th>
+                    <th>Unit</th>
+                    <th>Remarks</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tfoot>
+                  <tr>
+                    <td>Total:</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td> <b><span ng-bind="order.TotalQty"></span></b> </td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                  </tr>
+                </tfoot>
+                <tr ng-repeat="item in order.Items">
+                  <td><span ng-bind="item.FriendlyName"></span></td>
+                  <td><span ng-bind="item.PelletSize"></span></td>
+                  <td><span ng-bind="item.CasingSize"></span></td>
+                  <td><span ng-bind="item.CasingType"></span></td>
+                  <td><span ng-bind="item.BoreSize"></span></td>
+                  <td><span ng-bind="item.Qty"></span></td>
+                  <td><span ng-bind="item.Unit"></span></td>
+                  <td><span ng-bind="item.Remarks"></span></td>
+                  <td><button ng-click="removeInvoiceEntry($index)" class="btn btn-sm btn-danger pull-right">X</button></td>
+                </tr>
+
+              </table>
+            </div> <!-- locked order panel -->
+            <div class="row">
+              <div class="col-xs-12 col-sm-offset-2 col-sm-8">
+                {{ if eq .Nature "NEW" }}
+                <button ng-click="punchInvoice()" class="btn btn-lg btn-info btn-block">Punch Invoice</button>
+                {{ else if eq .Nature "EDIT" }}
+                <button ng-click="punchInvoice()" class="btn btn-lg btn-info btn-block">Edit Invoice</button>
+                {{ end }}
+              </div>
+            </div>
+          </div>
+
+          <hr>
+
+        </div> <!--ngshow order -->
+      </div><!-- showorder -->
+
+      <form ng-submit="AddTcDieOrphanRowInInvoice()">
+        <div class="row"><!-- orphan TCDie row -->
+          <div class="col-xs-12"> <!-- Pellet Row -->
+            <div class="row">
+              <div class="col-xs-10">
+                <select ng-model="orphan.TCDO.PelletSize" class="form-control" ng-options="k as k for k in DefaultPelletSizes">
+                  <option value='' disabled selected style='display:none;'>..........</option>
+                </select>
+              </div>
+              <div class="col-xs-2">
+                <a class="form-control btn btn-link"> + (TODO)</a>
+              </div>
+            </div>
+          </div> <!-- Pellet Row -->
+          <div class="col-xs-12"><!-- Casing Row -->
+            <div class="row">
+              <div class="col-xs-10">
+                <select ng-model="orphan.TCDO.CasingSize" class="form-control" ng-options="k as k for k in DefaultCasingSizes">
+                  <option value='' disabled selected style='display:none;'>..........</option>
+                </select>
+              </div>
+              <div class="col-xs-2">
+                <a class="form-control btn btn-link" ng-click="CreateCasingSize()"> + (TODO)</a>
+              </div>
+            </div>
+          </div><!-- Casing Row -->
+          <div class="col-xs-6">
+            <label>
+              <input type="radio" ng-model="orphan.TCDO.CasingType" value="Straight">
+              Straight
+            </label>
+          </div>
+          <div class="col-xs-6">
+            <label>
+              <input type="radio" ng-model="orphan.TCDO.CasingType"value="Taper">
+              Taper
+            </label>
+          </div>
+          <div class="col-xs-12">
+            <input required ng-model="orphan.TCDO.BoreSize" type="number" class="form-control" step=".01" placeholder="Bore"></input>
+          </div>
+          <div class="col-xs-12">
+            <input required ng-model="orphan.TCDO.Qty" type="number" class="form-control" placeholder="Qty"></input>
+          </div>
+          <div class="col-xs-12">
+            <input ng-model="orphan.TCDO.Remarks" type="text" class="form-control" placeholder="Remarks if any..."></input>
+          </div>
+          <div class="col-xs-12">
+            <button class="form-control btn btn-warning btn-mini btn-block">Add Die</button>
+          </div>
+        </div><!-- orphan TC Die row -->
+      </form>
+
+      <hr>
+
+      <form ng-submit="AddMiscOrphanRowInInvoice()">
+        <div class="row"><!-- orphan Misc row -->
+          <div class="container">
+            <div class="row">
+              <div class="col-xs-5">
+                <input required ng-model="orphan.Misc.FriendlyName" type="text" class="form-control" placeholder="Item..."></input>
+              </div>
+
+              <div class="col-xs-5">
+                <input required ng-model="orphan.Misc.Qty" type="number" class="form-control" placeholder="Qty"></input>
+              </div>
+              <div class="col-xs-2">
+                <input required ng-model="orphan.Misc.Unit" type="text" class="form-control" placeholder="pc/gm..."></input>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-xs-12">
+                <input ng-model="orphan.Misc.Remarks" type="text" class="form-control" placeholder="Remarks if any..."></input>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-xs-12">
+                <button class="form-control btn btn-warning btn-mini btn-block">Add Misc Item</button>
+              </div>
+            </div>
+          </div>
+        </div><!-- orphan Misc row -->
+      </form>
+
+
+    </div><!-- ng-show-->
+  </div> <!-- container -->
+</div> <!-- show=!working -->
+</body>
+</html>

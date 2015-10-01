@@ -66,6 +66,8 @@ func initStaticHTMLUrlMaps() {
 	}
 	http.HandleFunc("/order/new", newOrderPageHandler)
 	http.HandleFunc("/order/", editOrderPageHandler)
+	http.HandleFunc("/invoice/new", newInvoicePageHandler)
+	http.HandleFunc("/invoice/", editInvoicePageHandler)
 	return
 }
 
@@ -90,8 +92,40 @@ func init() {
 	return
 }
 
+func newInvoicePageHandler(w http.ResponseWriter, r *http.Request) {
+	t := template.Must(template.ParseFiles("templates/invoice.html"))
+	var data interface{}
+	data = struct{ Nature string }{"NEW"}
+	if t == nil {
+		t = PAGE_NOT_FOUND_TEMPLATE
+		data = nil
+	}
+
+	if err := t.Execute(w, data); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	return
+}
+
+func editInvoicePageHandler(w http.ResponseWriter, r *http.Request) {
+	t := template.Must(template.ParseFiles("templates/invoice.html"))
+	var data interface{}
+	data = struct{ Nature string }{"EDIT"}
+	if t == nil {
+		t = PAGE_NOT_FOUND_TEMPLATE
+		data = nil
+	}
+
+	if err := t.Execute(w, data); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	return
+}
+
 func newOrderPageHandler(w http.ResponseWriter, r *http.Request) {
-	t := template.Must(template.ParseFiles("templates/newOrder.html"))
+	t := template.Must(template.ParseFiles("templates/order.html"))
 	var data interface{}
 	data = struct{ Nature string }{"NEW"}
 	if t == nil {
@@ -107,7 +141,7 @@ func newOrderPageHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func editOrderPageHandler(w http.ResponseWriter, r *http.Request) {
-	t := template.Must(template.ParseFiles("templates/newOrder.html"))
+	t := template.Must(template.ParseFiles("templates/order.html"))
 	var data interface{}
 	data = struct{ Nature string }{"EDIT"}
 	if t == nil {

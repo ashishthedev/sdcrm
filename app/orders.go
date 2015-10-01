@@ -34,19 +34,19 @@ type Item struct {
 }
 
 type OrderId int64
-type ShipmentId int64
+type InvoiceId int64
 
 type Order struct {
-	Id            OrderId      `json:"Id" datastore:"-"`
-	Items         []Item       `json:"Items"`
-	Created       time.Time    `json:"Created"`
-	PODate        time.Time    `json:"PODate"`
-	TotalQty      int64        `json:"TotalQty"`
-	PurchaserName string       `json:"PurchaserName"`
-	SupplierName  string       `json:"SupplierName"`
-	PONumber      string       `json:"PONumber"`
-	Pending       bool         `json:"Pending"`
-	ShipmentsId   []ShipmentId `json:"ShipmentsId"`
+	Id            OrderId     `json:"Id" datastore:"-"`
+	Items         []Item      `json:"Items"`
+	Created       time.Time   `json:"Created"`
+	Date          time.Time   `json:"Date"`
+	TotalQty      int64       `json:"TotalQty"`
+	PurchaserName string      `json:"PurchaserName"`
+	SupplierName  string      `json:"SupplierName"`
+	Number        string      `json:"Number"`
+	Pending       bool        `json:"Pending"`
+	InvoicesId    []InvoiceId `json:"InvoicesId"`
 }
 
 func init() {

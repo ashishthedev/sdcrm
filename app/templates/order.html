@@ -46,12 +46,12 @@ appMod.controller('NewOrdersController', ['$scope', 'ORDERS', function($scope, O
 
     $scope.DateChanged = function() {
     var today = new Date();
-    if (today < $scope.order.PODate) {
-    $scope.order.PODate = today;
+    if (today < $scope.order.Date) {
+    $scope.order.Date = today;
     }
 
-    $scope.dateDiffFromTodayAsText = GetDateDiffAsText($scope.order.PODate);
-    $scope.order.PODateAsSeconds = JSDateToUnixTime($scope.order.PODate);
+    $scope.dateDiffFromTodayAsText = GetDateDiffAsText($scope.order.Date);
+    $scope.order.DateAsSeconds = JSDateToUnixTime($scope.order.Date);
     }
 
     $scope.updateTotalQty = function() {
@@ -123,12 +123,12 @@ appMod.controller('NewOrdersController', ['$scope', 'ORDERS', function($scope, O
       $scope.order.Items = [];
 
       if(NewOrEdit == "NEW"){
-        $scope.order.PODate = new Date();
+        $scope.order.Date = new Date();
         if (Debug()){
           $scope.order.PurchaserName = "Precision Drawell";
           $scope.order.SupplierName = "Standard";
-          $scope.order.PODate = new Date();
-          $scope.order.PONumber = "111";
+          $scope.order.Date = new Date();
+          $scope.order.Number = "111";
 
           $scope.orphan.Misc.Remarks="Misc Remarks";
           $scope.orphan.Misc.Qty = parseInt(2);
@@ -153,7 +153,7 @@ appMod.controller('NewOrdersController', ['$scope', 'ORDERS', function($scope, O
         orderId = document.URL.split("/")[4];
         ORDERS.get({id: orderId}).$promise.then(function(order){
             $scope.order = order;
-            $scope.order.PODate = new Date(order.PODate);
+            $scope.order.Date = new Date(order.Date);
             $scope.working = false;
             }, function(error){
             $scope.statusNote = error.status + ": " + error.data;
@@ -202,17 +202,17 @@ appMod.controller('NewOrdersController', ['$scope', 'ORDERS', function($scope, O
         </div>
       </div>
       <div class="col-xs-6">
-        <input ng-model="order.PONumber" type="text" class="form-control" placeholder="PO#"></input>
+        <input ng-model="order.Number" type="text" class="form-control" placeholder="PO#"></input>
       </div>
       <div class="col-xs-6 col-sm-4">
-        <input required class="center-block" autofocus="true" title="PO Date" type="date" ng-model="order.PODate" ng-change="DateChanged()" />
+        <input required class="center-block" autofocus="true" title="PO Date" type="date" ng-model="order.Date" ng-change="DateChanged()" />
         <div class="text-center" ng-bind="dateDiffFromTodayAsText"></div>
       </div>
     </div><!-- PO Global Details Row -->
 
     <hr>
 
-    <div ng-show="order.SupplierName && order.PurchaserName && order.PONumber && order.PODate">
+    <div ng-show="order.SupplierName && order.PurchaserName && order.Number && order.Date">
       <div><!-- showorder -->
         <div ng-show="(order.Items.length > 0)"> <!-- ngshow order -->
           <div class="well">
