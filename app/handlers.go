@@ -52,8 +52,7 @@ func initDynamicHTMLUrlMaps() {
 
 func initStaticHTMLUrlMaps() {
 	urlMaps := map[string]urlStruct{
-		"/order/new": {generalPageHandler, "templates/newOrder.html", struct{ Nature string }{"NEW"}},
-		"/orders":    {generalPageHandler, "templates/allOrders.html", nil},
+		"/orders": {generalPageHandler, "templates/allOrders.html", nil},
 	}
 
 	for path, urlBlob := range urlMaps {
@@ -65,6 +64,7 @@ func initStaticHTMLUrlMaps() {
 	for path, urlBlob := range urlMaps {
 		http.HandleFunc(path, urlBlob.handler)
 	}
+	http.HandleFunc("/order/new", newOrderPageHandler)
 	http.HandleFunc("/order/", editOrderPageHandler)
 	return
 }
@@ -87,6 +87,22 @@ func init() {
 	initRootApiMaps()
 	initStaticHTMLUrlMaps()
 	initDynamicHTMLUrlMaps()
+	return
+}
+
+func newOrderPageHandler(w http.ResponseWriter, r *http.Request) {
+	t := template.Must(template.ParseFiles("templates/newOrder.html"))
+	var data interface{}
+	data = struct{ Nature string }{"NEW"}
+	if t == nil {
+		t = PAGE_NOT_FOUND_TEMPLATE
+		data = nil
+	}
+
+	if err := t.Execute(w, data); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 	return
 }
 
