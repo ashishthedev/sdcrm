@@ -33,7 +33,7 @@ appMod.config(['$resourceProvider', function($resourceProvider) {
     $resourceProvider.defaults.stripTrailingSlashes = false;
     }]);
 
-appMod.controller('NewInvoicesController', ['$scope', 'ORDERS', function($scope, ORDERS) {
+appMod.controller('NewInvoicesController', ['$scope', 'INVOICES', function($scope, INVOICES) {
     var NewOrEdit = {{.Nature }};
 
     function FetchCompanies(){
@@ -46,30 +46,30 @@ appMod.controller('NewInvoicesController', ['$scope', 'ORDERS', function($scope,
 
     $scope.DateChanged = function() {
     var today = new Date();
-    if (today < $scope.order.PODate) {
-    $scope.order.PODate = today;
+    if (today < $scope.invoice.Date) {
+    $scope.invoice.Date = today;
     }
 
-    $scope.dateDiffFromTodayAsText = GetDateDiffAsText($scope.order.PODate);
-    $scope.order.PODateAsSeconds = JSDateToUnixTime($scope.order.PODate);
+    $scope.dateDiffFromTodayAsText = GetDateDiffAsText($scope.invoice.Date);
+    $scope.invoice.DateAsSeconds = JSDateToUnixTime($scope.invoice.Date);
     }
 
     $scope.updateTotalQty = function() {
       var t = 0;
-      var items = $scope.order.Items;
+      var items = $scope.invoice.Items;
       for(i=0; i < items.length; i++) {
         var item = items[i];
         t += parseInt(item.Qty);
       }
-      $scope.order.TotalQty = t;
+      $scope.invoice.TotalQty = t;
     }
     $scope.removeInvoiceEntry = function(index){
-      $scope.order.Items.splice(index, 1);
+      $scope.invoice.Items.splice(index, 1);
       $scope.updateTotalQty();
     }
 
     $scope.AddTcDieOrphanRowInInvoice = function(){
-      var items = $scope.order.Items;
+      var items = $scope.invoice.Items;
       var o = $scope.orphan.TCDO;
       var newItem = {};
       newItem.Type = "TCD";
@@ -88,7 +88,7 @@ appMod.controller('NewInvoicesController', ['$scope', 'ORDERS', function($scope,
 
 
     $scope.AddMiscOrphanRowInInvoice = function(){
-      var items = $scope.order.Items;
+      var items = $scope.invoice.Items;
       var o = $scope.orphan.Misc;
       var newItem = {};
       newItem.Type = "Misc"
@@ -102,9 +102,9 @@ appMod.controller('NewInvoicesController', ['$scope', 'ORDERS', function($scope,
 
     $scope.punchInvoice = function() {
       $scope.working = true;
-      ORDERS.save($scope.order).$promise.then(function(order){
-          $scope.statusNote = "Invoice saved with id: " + order.Id;
-          window.location = "/order/" + order.Id;
+      INVOICES.save($scope.invoice).$promise.then(function(invoice){
+          $scope.statusNote = "Invoice saved with id: " + invoice.Id;
+          window.location = "/invoice/" + invoice.Id;
           }, function(error){
           $scope.statusNote = error.status + ": " + error.data;
           $scope.working = false;
@@ -116,19 +116,19 @@ appMod.controller('NewInvoicesController', ['$scope', 'ORDERS', function($scope,
     init();
 
     function init(){
-      $scope.order = {};
+      $scope.invoice = {};
       $scope.orphan = {};
       $scope.orphan.Misc = {};
       $scope.orphan.TCDO = {};
-      $scope.order.Items = [];
+      $scope.invoice.Items = [];
 
       if(NewOrEdit == "NEW"){
-        $scope.order.PODate = new Date();
+        $scope.invoice.Date = new Date();
         if (Debug()){
-          $scope.order.PurchaserName = "Precision Drawell";
-          $scope.order.SupplierName = "Standard";
-          $scope.order.PODate = new Date();
-          $scope.order.PONumber = "111";
+          $scope.invoice.PurchaserName = "Precision Drawell";
+          $scope.invoice.SupplierName = "Standard";
+          $scope.invoice.Date = new Date();
+          $scope.invoice.Number = "111";
 
           $scope.orphan.Misc.Remarks="Misc Remarks";
           $scope.orphan.Misc.Qty = parseInt(2);
@@ -150,10 +150,10 @@ appMod.controller('NewInvoicesController', ['$scope', 'ORDERS', function($scope,
       }
       if (NewOrEdit == "EDIT"){
         $scope.working = true;
-        orderId = document.URL.split("/")[4];
-        ORDERS.get({id: orderId}).$promise.then(function(order){
-            $scope.order = order;
-            $scope.order.PODate = new Date(order.PODate);
+        invoiceId = document.URL.split("/")[4];
+        INVOICES.get({id: invoiceId}).$promise.then(function(invoice){
+            $scope.invoice = invoice;
+            $scope.invoice.Date = new Date(invoice.Date);
             $scope.working = false;
             }, function(error){
             $scope.statusNote = error.status + ": " + error.data;
@@ -185,14 +185,14 @@ appMod.controller('NewInvoicesController', ['$scope', 'ORDERS', function($scope,
   <div class="container">
     <div class="row"><!-- PO Global Details Row -->
       <div class="col-xs-6">
-        <select ng-model="order.SupplierName" class="form-control" ng-options="k as k for k in availableSuppliers">
+        <select ng-model="invoice.SupplierName" class="form-control" ng-options="k as k for k in availableSuppliers">
           <option value='' disabled selected style='display:none;'>..........</option>
         </select>
       </div>
       <div class="col-xs-6">
         <div class="row">
           <div class="col-xs-12 col-sm-8">
-            <select ng-model="order.PurchaserName" class="form-control" ng-options="k as k for k in availableCompanies">
+            <select ng-model="invoice.PurchaserName" class="form-control" ng-options="k as k for k in availableCompanies">
               <option value='' disabled selected style='display:none;'>..........</option>
             </select>
           </div>
@@ -202,21 +202,21 @@ appMod.controller('NewInvoicesController', ['$scope', 'ORDERS', function($scope,
         </div>
       </div>
       <div class="col-xs-6">
-        <input ng-model="order.PONumber" type="text" class="form-control" placeholder="PO#"></input>
+        <input ng-model="invoice.Number" type="text" class="form-control" placeholder="PO#"></input>
       </div>
       <div class="col-xs-6 col-sm-4">
-        <input required class="center-block" autofocus="true" title="PO Date" type="date" ng-model="order.PODate" ng-change="DateChanged()" />
+        <input required class="center-block" autofocus="true" title="PO Date" type="date" ng-model="invoice.Date" ng-change="DateChanged()" />
         <div class="text-center" ng-bind="dateDiffFromTodayAsText"></div>
       </div>
     </div><!-- PO Global Details Row -->
 
     <hr>
 
-    <div ng-show="order.SupplierName && order.PurchaserName && order.PONumber && order.PODate">
-      <div><!-- showorder -->
-        <div ng-show="(order.Items.length > 0)"> <!-- ngshow order -->
+    <div ng-show="invoice.SupplierName && invoice.PurchaserName && invoice.Number && invoice.Date">
+      <div><!-- showinvoice -->
+        <div ng-show="(invoice.Items.length > 0)"> <!-- ngshow invoice -->
           <div class="well">
-            <div class="panel panel-success"> <!-- locked order panel -->
+            <div class="panel panel-success"> <!-- locked invoice panel -->
               <table class="table table-striped table-condensed panel-body">
                 <thead>
                   <tr>
@@ -238,13 +238,13 @@ appMod.controller('NewInvoicesController', ['$scope', 'ORDERS', function($scope,
                     <td></td>
                     <td></td>
                     <td></td>
-                    <td> <b><span ng-bind="order.TotalQty"></span></b> </td>
+                    <td> <b><span ng-bind="invoice.TotalQty"></span></b> </td>
                     <td></td>
                     <td></td>
                     <td></td>
                   </tr>
                 </tfoot>
-                <tr ng-repeat="item in order.Items">
+                <tr ng-repeat="item in invoice.Items">
                   <td><span ng-bind="item.FriendlyName"></span></td>
                   <td><span ng-bind="item.PelletSize"></span></td>
                   <td><span ng-bind="item.CasingSize"></span></td>
@@ -257,7 +257,7 @@ appMod.controller('NewInvoicesController', ['$scope', 'ORDERS', function($scope,
                 </tr>
 
               </table>
-            </div> <!-- locked order panel -->
+            </div> <!-- locked invoice panel -->
             <div class="row">
               <div class="col-xs-12 col-sm-offset-2 col-sm-8">
                 {{ if eq .Nature "NEW" }}
@@ -271,8 +271,8 @@ appMod.controller('NewInvoicesController', ['$scope', 'ORDERS', function($scope,
 
           <hr>
 
-        </div> <!--ngshow order -->
-      </div><!-- showorder -->
+        </div> <!--ngshow invoice -->
+      </div><!-- showinvoice -->
 
       <form ng-submit="AddTcDieOrphanRowInInvoice()">
         <div class="row"><!-- orphan TCDie row -->

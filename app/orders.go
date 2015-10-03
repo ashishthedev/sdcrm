@@ -13,6 +13,7 @@ import (
 	"appengine/datastore"
 	"encoding/json"
 	"fmt"
+	"html/template"
 	"io"
 	"net/http"
 	"strconv"
@@ -34,7 +35,6 @@ type Item struct {
 }
 
 type OrderId int64
-type InvoiceId int64
 
 type Order struct {
 	Id            OrderId     `json:"Id" datastore:"-"`
@@ -51,6 +51,10 @@ type Order struct {
 
 func init() {
 	http.Handle(ORDERS_API, gaeHandler(orderHandler))
+	http.HandleFunc("/order/new/", newOrderPageHandler)
+	http.HandleFunc("/order/", editOrderPageHandler)
+	http.HandleFunc("/orders/", allOrdersPageHandler)
+	return
 }
 
 func orderHandler(c appengine.Context, w http.ResponseWriter, r *http.Request) (interface{}, error) {
@@ -66,6 +70,8 @@ func orderHandler(c appengine.Context, w http.ResponseWriter, r *http.Request) (
 			order := new(Order)
 			order.Id = OrderId(oid64)
 			return order.get(c)
+		default:
+			return nil, fmt.Errorf(r.Method + " on " + r.URL.Path + " not implemented")
 		}
 	} else {
 		switch r.Method {
@@ -130,4 +136,36 @@ func getAllOrders(c appengine.Context) ([]Order, error) {
 		orders[i].Id = OrderId(ks[i].IntID())
 	}
 	return orders, nil
+}
+
+func newOrderPageHandler(w http.ResponseWriter, r *http.Request) {
+	t := template.Must(template.ParseFiles("templates/order.html"))
+	var data interface{}
+	data = struct{ Nature string }{"NEW"}
+	if err := t.Execute(w, data); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	return
+}
+
+func editOrderPageHandler(w http.ResponseWriter, r *http.Request) {
+	t := template.Must(template.ParseFiles("templates/order.html"))
+	var data interface{}
+	data = struct{ Nature string }{"EDIT"}
+
+	if err := t.Execute(w, data); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	return
+}
+
+func allOrdersPageHandler(w http.ResponseWriter, r *http.Request) {
+	t := template.Must(template.ParseFiles("templates/orders.html"))
+	if err := t.Execute(w, nil); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	return
 }

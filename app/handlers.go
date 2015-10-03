@@ -21,10 +21,6 @@ func (h gaeHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func Orders(c appengine.Context, w http.ResponseWriter, r *http.Request) error {
-	return nil
-}
-
 type urlStruct struct {
 	handler      func(w http.ResponseWriter, r *http.Request)
 	templatePath string
@@ -51,9 +47,7 @@ func initDynamicHTMLUrlMaps() {
 }
 
 func initStaticHTMLUrlMaps() {
-	urlMaps := map[string]urlStruct{
-		"/orders": {generalPageHandler, "templates/allOrders.html", nil},
-	}
+	urlMaps := map[string]urlStruct{}
 
 	for path, urlBlob := range urlMaps {
 		templatePath := urlBlob.templatePath
@@ -64,10 +58,6 @@ func initStaticHTMLUrlMaps() {
 	for path, urlBlob := range urlMaps {
 		http.HandleFunc(path, urlBlob.handler)
 	}
-	http.HandleFunc("/order/new", newOrderPageHandler)
-	http.HandleFunc("/order/", editOrderPageHandler)
-	http.HandleFunc("/invoice/new", newInvoicePageHandler)
-	http.HandleFunc("/invoice/", editInvoicePageHandler)
 	return
 }
 
@@ -89,70 +79,6 @@ func init() {
 	initRootApiMaps()
 	initStaticHTMLUrlMaps()
 	initDynamicHTMLUrlMaps()
-	return
-}
-
-func newInvoicePageHandler(w http.ResponseWriter, r *http.Request) {
-	t := template.Must(template.ParseFiles("templates/invoice.html"))
-	var data interface{}
-	data = struct{ Nature string }{"NEW"}
-	if t == nil {
-		t = PAGE_NOT_FOUND_TEMPLATE
-		data = nil
-	}
-
-	if err := t.Execute(w, data); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	return
-}
-
-func editInvoicePageHandler(w http.ResponseWriter, r *http.Request) {
-	t := template.Must(template.ParseFiles("templates/invoice.html"))
-	var data interface{}
-	data = struct{ Nature string }{"EDIT"}
-	if t == nil {
-		t = PAGE_NOT_FOUND_TEMPLATE
-		data = nil
-	}
-
-	if err := t.Execute(w, data); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	return
-}
-
-func newOrderPageHandler(w http.ResponseWriter, r *http.Request) {
-	t := template.Must(template.ParseFiles("templates/order.html"))
-	var data interface{}
-	data = struct{ Nature string }{"NEW"}
-	if t == nil {
-		t = PAGE_NOT_FOUND_TEMPLATE
-		data = nil
-	}
-
-	if err := t.Execute(w, data); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
-	return
-}
-
-func editOrderPageHandler(w http.ResponseWriter, r *http.Request) {
-	t := template.Must(template.ParseFiles("templates/order.html"))
-	var data interface{}
-	data = struct{ Nature string }{"EDIT"}
-	if t == nil {
-		t = PAGE_NOT_FOUND_TEMPLATE
-		data = nil
-	}
-
-	if err := t.Execute(w, data); err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
-		return
-	}
 	return
 }
 

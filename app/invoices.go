@@ -13,6 +13,7 @@ import (
 	"appengine/datastore"
 	"encoding/json"
 	"fmt"
+	"html/template"
 	"io"
 	"net/http"
 	"strconv"
@@ -20,6 +21,8 @@ import (
 )
 
 const INVOICES_API = "/api/invoices/"
+
+type InvoiceId int64
 
 type Invoice struct {
 	Id            InvoiceId `json:"Id" datastore:"-"`
@@ -35,6 +38,9 @@ type Invoice struct {
 
 func init() {
 	http.Handle(INVOICES_API, gaeHandler(invoiceHandler))
+	http.HandleFunc("/invoice/new/", newInvoicePageHandler)
+	http.HandleFunc("/invoice/", editInvoicePageHandler)
+	http.HandleFunc("/invoices/", allInvoicePageHandler)
 }
 
 func invoiceHandler(c appengine.Context, w http.ResponseWriter, r *http.Request) (interface{}, error) {
@@ -50,6 +56,8 @@ func invoiceHandler(c appengine.Context, w http.ResponseWriter, r *http.Request)
 			invoice := new(Invoice)
 			invoice.Id = InvoiceId(id64)
 			return invoice.get(c)
+		default:
+			return nil, fmt.Errorf(r.Method + " on " + r.URL.Path + " not implemented")
 		}
 	} else {
 		switch r.Method {
@@ -114,4 +122,45 @@ func getAllInvoices(c appengine.Context) ([]Invoice, error) {
 		invoices[i].Id = InvoiceId(ks[i].IntID())
 	}
 	return invoices, nil
+}
+
+func newInvoicePageHandler(w http.ResponseWriter, r *http.Request) {
+	t := template.Must(template.ParseFiles("templates/invoice.html"))
+	var data interface{}
+	data = struct{ Nature string }{"NEW"}
+	if t == nil {
+		t = PAGE_NOT_FOUND_TEMPLATE
+		data = nil
+	}
+
+	if err := t.Execute(w, data); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	return
+}
+
+func editInvoicePageHandler(w http.ResponseWriter, r *http.Request) {
+	t := template.Must(template.ParseFiles("templates/invoice.html"))
+	var data interface{}
+	data = struct{ Nature string }{"EDIT"}
+	if t == nil {
+		t = PAGE_NOT_FOUND_TEMPLATE
+		data = nil
+	}
+
+	if err := t.Execute(w, data); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	return
+}
+
+func allInvoicePageHandler(w http.ResponseWriter, r *http.Request) {
+	t := template.Must(template.ParseFiles("templates/invoices.html"))
+	if err := t.Execute(w, nil); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	return
 }
