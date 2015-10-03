@@ -82,7 +82,10 @@ appMod.controller('NewPurchasersController', ['$scope', 'PURCHASERS', function($
           $scope.purchaser.MDPhoneNumbers = "+919971008002";
           $scope.purchaser.CreditDays = 45;
           $scope.purchaser.Remarks = "These will be remarks";
-          $scope.purchaser.Rates = [{"Name":"10x08", "Rate":180}, {"Name":"13x10", "Rate":300}];
+          $scope.purchaser.Rates = [{"Type": "TCD", "Name":"10x08", "Rate":180},
+            {"Type":"TCD", "Name":"13x10", "Rate":300},
+            {"Type":"Misc", "Name":"Boron Carbide 150mesh 100gm", "Rate": 600},
+            ];
 
           $scope.working = false;
         }
@@ -97,6 +100,7 @@ appMod.controller('NewPurchasersController', ['$scope', 'PURCHASERS', function($
             $scope.working = false;
             });
       }
+      $scope.rateItemTypes = [{"Type":"TCD", "DisplayName":"TC Die"}, {"Type":"MSC", "DisplayName":"Misc"}]
     }
 
 
@@ -124,80 +128,80 @@ appMod.controller('NewPurchasersController', ['$scope', 'PURCHASERS', function($
       <fieldset>
 
         <div class="form-group">
-          <label for="Name" class="col-lg-2 control-label">Purchaser Name</label>
-          <div class="col-lg-10">
+          <label for="Name" class="col-xs-2 control-label">Purchaser Name</label>
+          <div class="col-xs-10">
             <input type="text" class="form-control" id="Name" ng-model="purchaser.Name" placeholder="Purchaser Name...">
           </div>
         </div>
         <div class="form-group">
-          <label for="DispatchEmails" class="col-lg-2 control-label">Dispatch Email List</label>
-          <div class="col-lg-10">
+          <label for="DispatchEmails" class="col-xs-2 control-label">Dispatch Email List</label>
+          <div class="col-xs-10">
             <input type="email" class="form-control" id="DispatchEmails" ng-model="purchaser.DispatchEmails" placeholder="Dispatch Email List...">
           </div>
         </div>
         <div class="form-group">
-          <label for="FORMCEmails" class="col-lg-2 control-label">FORMC Email List</label>
-          <div class="col-lg-10">
+          <label for="FORMCEmails" class="col-xs-2 control-label">FORMC Email List</label>
+          <div class="col-xs-10">
             <input type="email" class="form-control" id="FORMCEmails" ng-model="purchaser.FORMCEmails" placeholder="FORMC Email List...">
           </div>
         </div>
         <div class="form-group">
-          <label for="TinNumber" class="col-lg-2 control-label">Tin Number</label>
-          <div class="col-lg-10">
+          <label for="TinNumber" class="col-xs-2 control-label">Tin Number</label>
+          <div class="col-xs-10">
             <input type="text" class="form-control" id="TinNumber" ng-model="purchaser.TinNumber" placeholder="TinNumber...">
           </div>
         </div>
         <div class="form-group">
-          <label for="BillingAddress" class="col-lg-2 control-label">Billing Address</label>
-          <div class="col-lg-10">
+          <label for="BillingAddress" class="col-xs-2 control-label">Billing Address</label>
+          <div class="col-xs-10">
             <input type="text" class="form-control" id="BillingAddress" ng-model="purchaser.BillingAddress" placeholder="Billing Address...">
           </div>
         </div>
         <div class="form-group">
-          <label for="DeliveryAddress" class="col-lg-2 control-label">Delivery Address</label>
-          <div class="col-lg-10">
+          <label for="DeliveryAddress" class="col-xs-2 control-label">Delivery Address</label>
+          <div class="col-xs-10">
             <input type="text" class="form-control" id="DeliveryAddress" ng-model="purchaser.DeliveryAddress" placeholder="Delivery Address...">
           </div>
         </div>
         <div class="form-group">
-          <label for="City" class="col-lg-2 control-label">City</label>
-          <div class="col-lg-10">
+          <label for="City" class="col-xs-2 control-label">City</label>
+          <div class="col-xs-10">
             <input type="text" class="form-control" id="City" ng-model="purchaser.City" placeholder="City Name...">
           </div>
         </div>
         <div class="form-group">
-          <label for="State" class="col-lg-2 control-label">State</label>
-          <div class="col-lg-10">
+          <label for="State" class="col-xs-2 control-label">State</label>
+          <div class="col-xs-10">
             <input type="text" class="form-control" id="State" ng-model="purchaser.State" placeholder="State...">
           </div>
         </div>
         <div class="form-group">
-          <label for="Pincode" class="col-lg-2 control-label">Pincode</label>
-          <div class="col-lg-10">
+          <label for="Pincode" class="col-xs-2 control-label">Pincode</label>
+          <div class="col-xs-10">
             <input type="text" class="form-control" id="Pincode" ng-model="purchaser.Pincode" placeholder="Pincode...">
           </div>
         </div>
         <div class="form-group">
-          <label for="EnvelopePhoneNumbers" class="col-lg-2 control-label">Envelope Phone Numbers</label>
-          <div class="col-lg-10">
+          <label for="EnvelopePhoneNumbers" class="col-xs-2 control-label">Envelope Phone Numbers</label>
+          <div class="col-xs-10">
             <input type="text" class="form-control" id="EnvelopePhoneNumbers" ng-model="purchaser.EnvelopePhoneNumbers" placeholder="Envelop Phonenumbers...">
           </div>
         </div>
         <div class="form-group">
-          <label for="MDPhoneNumbers" class="col-lg-2 control-label">MD Phone Numbers</label>
-          <div class="col-lg-10">
+          <label for="MDPhoneNumbers" class="col-xs-2 control-label">MD Phone Numbers</label>
+          <div class="col-xs-10">
             <input type="text" class="form-control" id="MDPhoneNumbers" ng-model="purchaser.MDPhoneNumbers" placeholder="MD Phonenumbers...">
           </div>
         </div>
         <div class="form-group">
-          <label for="CreditDays" class="col-lg-2 control-label">Credit Days</label>
-          <div class="col-lg-10">
+          <label for="CreditDays" class="col-xs-2 control-label">Credit Days</label>
+          <div class="col-xs-10">
             <input type="integer" class="form-control" id="CreditDays" ng-model="purchaser.CreditDays" placeholder="Credit Days...">
           </div>
         </div>
         <div class="form-group">
-          <label for="Remarks" class="col-lg-2 control-label">Remarks</label>
-          <div class="col-lg-10">
+          <label for="Remarks" class="col-xs-2 control-label">Remarks</label>
+          <div class="col-xs-10">
             <input type="text" class="form-control" id="Remarks" ng-model="purchaser.Remarks" placeholder="Remarks...">
           </div>
         </div>
@@ -208,28 +212,41 @@ appMod.controller('NewPurchasersController', ['$scope', 'PURCHASERS', function($
       <fieldset>
         <legend>Rates</legend>
         <div class="form-group" ng-repeat="i in purchaser.Rates">
-          <label for="||i.Name||-id" class="col-lg-2 control-label">||i.Name||</label>
-          <div class="col-lg-10">
+          <label for="||i.Name||-id" class="col-xs-2 control-label">||i.Name||</label>
+          <div class="col-xs-10">
             <input type="text" class="form-control" id="||i.Name||-id" ng-model="i.Rate">
           </div>
         </div>
+
         <div class="form-group">
-          <div class="col-lg-2">
-            <button class="form-control btn btn-info" ng-click="addRateItem()">Add Item</button>
-          </div>
-          <div class="col-lg-10">
+          <div class="col-xs-10">
             <div class="row">
-              <div class="col-lg-6">
+              <div class="col-xs-4">
+                <select ng-model="orphanRateItem.Type" class="form-control" ng-options="t.Type as t.DisplayName for t in rateItemTypes">
+                  <option value='' disabled selected style='display:none;'></option>
+                </select>
+              </div>
+              <div class="col-xs-4">
                 <input type="text" class="form-control" ng-model="orphanRateItem.Name" placeholder="Name...">
               </div>
-              <div class="col-lg-6">
+              <div class="col-xs-4">
                 <input type="number" class="form-control" ng-model="orphanRateItem.Rate" placeholder="Rate...">
               </div>
             </div>
           </div>
+          <div class="col-xs-2">
+            <button class="form-control btn btn-info" ng-click="addRateItem()">Add Item</button>
+          </div>
         </div>
+
       </fieldset>
     </form>
+    <div class="form-group">
+      <div class="col-xs-10 col-xs-offset-2">
+        <button type="reset" class="btn btn-default">Cancel</button>
+        <button type="submit" class="btn btn-primary">Submit</button>
+      </div>
+    </div>
   </div> <!-- container -->
 </div> <!-- show=!working -->
 </body>
