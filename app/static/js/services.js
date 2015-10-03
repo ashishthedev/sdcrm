@@ -16,3 +16,8 @@ services.factory('INVOICES', ['$resource', function($resource){
     return $resource('/api/invoices/:id',{},{
     });
   }]);
+
+services.factory('PURCHASERS', ['$resource', function($resource){
+    return $resource('/api/purchasers/:id',{},{
+    });
+  }]);

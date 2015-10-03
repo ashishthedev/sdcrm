@@ -116,6 +116,7 @@ appMod.controller('NewOrdersController', ['$scope', 'ORDERS', function($scope, O
     init();
 
     function init(){
+      $scope.working = true;
       $scope.order = {};
       $scope.orphan = {};
       $scope.orphan.Misc = {};
@@ -146,10 +147,10 @@ appMod.controller('NewOrdersController', ['$scope', 'ORDERS', function($scope, O
 
           $scope.AddTcDieOrphanRowInOrder();
           $scope.updateTotalQty();
+          $scope.working = false;
         }
       }
       if (NewOrEdit == "EDIT"){
-        $scope.working = true;
         orderId = document.URL.split("/")[4];
         ORDERS.get({id: orderId}).$promise.then(function(order){
             $scope.order = order;

@@ -43,6 +43,7 @@ appMod.controller('AllOrdersController', ['$scope', 'ORDERS', function($scope, O
       $scope.orders = orders;
       }, function(error){
       $scope.statusNote = error.status + ": " + error.data;
+    $scope.working = false;
       });
     }
     init()

@@ -123,6 +123,7 @@ appMod.controller('NewInvoicesController', ['$scope', 'INVOICES', function($scop
       $scope.invoice.Items = [];
 
       if(NewOrEdit == "NEW"){
+      $scope.working = true;
         $scope.invoice.Date = new Date();
         if (Debug()){
           $scope.invoice.PurchaserName = "Precision Drawell";
@@ -146,6 +147,7 @@ appMod.controller('NewInvoicesController', ['$scope', 'INVOICES', function($scop
 
           $scope.AddTcDieOrphanRowInInvoice();
           $scope.updateTotalQty();
+          $scope.working = false;
         }
       }
       if (NewOrEdit == "EDIT"){

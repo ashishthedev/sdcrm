@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>All Invoices</title>
+<title>All Purchasers</title>
 <script src="/static/lib/angular/angular.min.js"></script>
 <script src="/static/lib/angular/angular-resource.min.js"></script>
 <script src="/static/js/script.js"></script>
@@ -33,14 +33,14 @@ appMod.config(function($interpolateProvider) {
     $interpolateProvider.startSymbol('||');
     $interpolateProvider.endSymbol('||');
     });
-appMod.controller('AllInvoicesController', ['$scope', 'INVOICES', function($scope, INVOICES) {
+appMod.controller('AllPurchasersController', ['$scope', 'PURCHASERS', function($scope, PURCHASERS) {
 
     function init(){
 
     $scope.working = true;
-    INVOICES.query().$promise.then(function(invoices){
+    PURCHASERS.query().$promise.then(function(purchasers){
       $scope.working = false;
-      $scope.invoices = invoices;
+      $scope.purchasers = purchasers;
       }, function(error){
       $scope.statusNote = error.status + ": " + error.data;
       $scope.working = false;
@@ -52,10 +52,10 @@ appMod.controller('AllInvoicesController', ['$scope', 'INVOICES', function($scop
 
 </script>
 </head>
-<body ng-app="crmapp" ng-controller="AllInvoicesController">
+<body ng-app="crmapp" ng-controller="AllPurchasersController">
 <div class="well">
   <a href="/"><img class="center-block" src="/static/img/57.png" /></a>
-  <h1 class="text-center">All Invoices</h1>
+  <h1 class="text-center">All Purchasers</h1>
   <div id="statusNote" ng-bind="statusNote"></div>
 </div>
 <div ng-show="working"> <!-- show=working -->
@@ -64,9 +64,9 @@ appMod.controller('AllInvoicesController', ['$scope', 'INVOICES', function($scop
 
 <div ng-show="!working"> <!-- show=!working -->
   <div class="container">
-    <div ng-repeat="o in invoices">
+    <div ng-repeat="o in purchasers">
       <div class="row">
-        <a href="/invoice/||o.Id||"><span ng-bind="o.Id"></span></a>
+        <a href="/purchaser/||o.Id||"><span ng-bind="o.Id"></span></a>
       </div>
     </div>
   </div> <!-- container -->

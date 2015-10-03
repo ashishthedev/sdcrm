@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html>
+<head>
+{{ if eq .Nature "NEW" }}
+<title>RegisterPurchaser</title>
+{{ else if eq .Nature "EDIT" }}
+<title>EditPurchaser</title>
+{{ end }}
+<script src="/static/lib/angular/angular.min.js"></script>
+<script src="/static/lib/angular/angular-resource.min.js"></script>
+<script src="/static/js/script.js"></script>
+<script src="/static/js/services.js"></script>
+
+<!-- Standard Favicon -->
+<link rel="icon" type="image/x-icon" href="/static/img/favicon.ico" />
+
+<!-- For iPhone 4 Retina display: -->
+<link rel="apple-touch-icon-precomposed" sizes="114x114" href="/static/img/114.png">
+
+<!-- For iPad: -->
+<link rel="apple-touch-icon-precomposed" sizes="72x72" href="/static/img/72.png">
+
+<!-- For iPhone: -->
+<link rel="apple-touch-icon-precomposed" href="/static/img/57.png">
+
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=yes">
+<link rel="stylesheet" href="/static/css/bootstrap.min.css" type="text/css" >
+<link rel="stylesheet" href="/static/css/bs_modified.css" type="text/css" >
+<script>
+var appMod = angular.module('crmapp', ['services']);
+appMod.config(['$resourceProvider', function($resourceProvider) {
+    // Don't strip trailing slashes from calculated URLs
+    $resourceProvider.defaults.stripTrailingSlashes = false;
+    }]);
+
+appMod.config(function($interpolateProvider) {
+    $interpolateProvider.startSymbol('||');
+    $interpolateProvider.endSymbol('||');
+    });
+appMod.controller('NewPurchasersController', ['$scope', 'PURCHASERS', function($scope, PURCHASERS) {
+    var NewOrEdit = {{.Nature }};
+
+    $scope.registerPurchaser = function() {
+    $scope.working = true;
+    PURCHASERS.save($scope.purchaser).$promise.then(function(purchaser){
+      $scope.statusNote = "Purchaser saved with id: " + purchaser.Id;
+      window.location = "/purchaser/" + purchaser.Id;
+      }, function(error){
+      $scope.statusNote = error.status + ": " + error.data;
+      $scope.working = false;
+      });
+    }
+
+    $scope.addRateItem = function() {
+    var items = $scope.purchaser.Rates;
+    var newItem = {}
+    newItem["Name"]= $scope.orphanRateItem.Name;
+    newItem["Rate"]= $scope.orphanRateItem.Rate;
+    items.splice(items.length, 0, angular.copy(newItem));
+    $scope.orphanRateItem.Name = "";
+    $scope.orphanRateItem.Rate = "";
+    }
+
+    init();
+
+    function init(){
+      $scope.working = true;
+      $scope.purchaser = {};
+      if(NewOrEdit == "NEW"){
+        if (Debug()){
+          $scope.purchaser.Name = "Precision Drawell";
+          $scope.purchaser.DispatchEmails = "ashishthedev@gmail.com";
+          $scope.purchaser.FORMCEmails = "ashishthedev@gmail.com";
+          $scope.purchaser.TinNumber = "abcdefghijk";
+          $scope.purchaser.BillingAddress = "This is going to be the billing address";
+          $scope.purchaser.DeliveryAddress = "This is going to be the delivery address";
+          $scope.purchaser.City = "This is going to be the City";
+          $scope.purchaser.State = "This is going to be the state";
+          $scope.purchaser.Pincode = "This is going to be the pincode";
+          $scope.purchaser.EnvelopePhoneNumbers = "+919971008002; +919971008002";
+          $scope.purchaser.SMSPhoneNumbers = "+919971008002";
+          $scope.purchaser.MDPhoneNumbers = "+919971008002";
+          $scope.purchaser.CreditDays = 45;
+          $scope.purchaser.Remarks = "These will be remarks";
+          $scope.purchaser.Rates = [{"Name":"10x08", "Rate":180}, {"Name":"13x10", "Rate":300}];
+
+          $scope.working = false;
+        }
+      }
+      if (NewOrEdit == "EDIT"){
+        purchaserId = document.URL.split("/")[4];
+        PURCHASERS.get({id: purchaserId}).$promise.then(function(purchaser){
+            $scope.purchaser = purchaser;
+            $scope.working = false;
+            }, function(error){
+            $scope.statusNote = error.status + ": " + error.data;
+            $scope.working = false;
+            });
+      }
+    }
+
+
+}]);
+
+</script>
+</head>
+<body ng-app="crmapp" ng-controller="NewPurchasersController">
+<div class="well">
+  <a href="/"><img class="center-block" src="/static/img/57.png" /></a>
+  {{ if eq .Nature "NEW" }}
+  <h1 class="text-center">Register Purchaser</h1>
+  {{ else if eq .Nature "EDIT" }}
+  <h1 class="text-center">Edit Purchaser</h1>
+  {{ end }}
+  <div id="statusNote" ng-bind="statusNote"></div>
+</div>
+<div ng-show="working"> <!-- show=working -->
+  <img class="center-block" src="/static/img/working.gif" />
+</div> <!-- show=working -->
+
+<div ng-show="!working"> <!-- show=!working -->
+  <div class="container">
+    <form class="form-horizontal">
+      <fieldset>
+
+        <div class="form-group">
+          <label for="Name" class="col-lg-2 control-label">Purchaser Name</label>
+          <div class="col-lg-10">
+            <input type="text" class="form-control" id="Name" ng-model="purchaser.Name" placeholder="Purchaser Name...">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="DispatchEmails" class="col-lg-2 control-label">Dispatch Email List</label>
+          <div class="col-lg-10">
+            <input type="email" class="form-control" id="DispatchEmails" ng-model="purchaser.DispatchEmails" placeholder="Dispatch Email List...">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="FORMCEmails" class="col-lg-2 control-label">FORMC Email List</label>
+          <div class="col-lg-10">
+            <input type="email" class="form-control" id="FORMCEmails" ng-model="purchaser.FORMCEmails" placeholder="FORMC Email List...">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="TinNumber" class="col-lg-2 control-label">Tin Number</label>
+          <div class="col-lg-10">
+            <input type="text" class="form-control" id="TinNumber" ng-model="purchaser.TinNumber" placeholder="TinNumber...">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="BillingAddress" class="col-lg-2 control-label">Billing Address</label>
+          <div class="col-lg-10">
+            <input type="text" class="form-control" id="BillingAddress" ng-model="purchaser.BillingAddress" placeholder="Billing Address...">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="DeliveryAddress" class="col-lg-2 control-label">Delivery Address</label>
+          <div class="col-lg-10">
+            <input type="text" class="form-control" id="DeliveryAddress" ng-model="purchaser.DeliveryAddress" placeholder="Delivery Address...">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="City" class="col-lg-2 control-label">City</label>
+          <div class="col-lg-10">
+            <input type="text" class="form-control" id="City" ng-model="purchaser.City" placeholder="City Name...">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="State" class="col-lg-2 control-label">State</label>
+          <div class="col-lg-10">
+            <input type="text" class="form-control" id="State" ng-model="purchaser.State" placeholder="State...">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="Pincode" class="col-lg-2 control-label">Pincode</label>
+          <div class="col-lg-10">
+            <input type="text" class="form-control" id="Pincode" ng-model="purchaser.Pincode" placeholder="Pincode...">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="EnvelopePhoneNumbers" class="col-lg-2 control-label">Envelope Phone Numbers</label>
+          <div class="col-lg-10">
+            <input type="text" class="form-control" id="EnvelopePhoneNumbers" ng-model="purchaser.EnvelopePhoneNumbers" placeholder="Envelop Phonenumbers...">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="MDPhoneNumbers" class="col-lg-2 control-label">MD Phone Numbers</label>
+          <div class="col-lg-10">
+            <input type="text" class="form-control" id="MDPhoneNumbers" ng-model="purchaser.MDPhoneNumbers" placeholder="MD Phonenumbers...">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="CreditDays" class="col-lg-2 control-label">Credit Days</label>
+          <div class="col-lg-10">
+            <input type="integer" class="form-control" id="CreditDays" ng-model="purchaser.CreditDays" placeholder="Credit Days...">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="Remarks" class="col-lg-2 control-label">Remarks</label>
+          <div class="col-lg-10">
+            <input type="text" class="form-control" id="Remarks" ng-model="purchaser.Remarks" placeholder="Remarks...">
+          </div>
+        </div>
+      </fieldset>
+    </form>
+
+    <form class="form-horizontal">
+      <fieldset>
+        <legend>Rates</legend>
+        <div class="form-group" ng-repeat="i in purchaser.Rates">
+          <label for="||i.Name||-id" class="col-lg-2 control-label">||i.Name||</label>
+          <div class="col-lg-10">
+            <input type="text" class="form-control" id="||i.Name||-id" ng-model="i.Rate">
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="col-lg-2">
+            <button class="form-control btn btn-info" ng-click="addRateItem()">Add Item</button>
+          </div>
+          <div class="col-lg-10">
+            <div class="row">
+              <div class="col-lg-6">
+                <input type="text" class="form-control" ng-model="orphanRateItem.Name" placeholder="Name...">
+              </div>
+              <div class="col-lg-6">
+                <input type="number" class="form-control" ng-model="orphanRateItem.Rate" placeholder="Rate...">
+              </div>
+            </div>
+          </div>
+        </div>
+      </fieldset>
+    </form>
+  </div> <!-- container -->
+</div> <!-- show=!working -->
+</body>
+</html>
