@@ -9,8 +9,6 @@ Q Get("/api/invoices/") -> Get all invoices
 */
 
 import (
-	"appengine"
-	"appengine/datastore"
 	"encoding/json"
 	"fmt"
 	"html/template"
@@ -18,6 +16,9 @@ import (
 	"net/http"
 	"strconv"
 	"time"
+
+	"appengine"
+	"appengine/datastore"
 )
 
 const INVOICES_API = "/api/invoices/"

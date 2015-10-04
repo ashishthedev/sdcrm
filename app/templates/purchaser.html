@@ -51,14 +51,38 @@ appMod.controller('NewPurchasersController', ['$scope', 'PURCHASERS', function($
       });
     }
 
-    $scope.addRateItem = function() {
-    var items = $scope.purchaser.Rates;
+    $scope.addTCDSKUItem = function() {
+    var items = $scope.purchaser.SKUs;
     var newItem = {}
-    newItem["Name"]= $scope.orphanRateItem.Name;
-    newItem["Rate"]= $scope.orphanRateItem.Rate;
+    newItem["Type"]= "TCD";
+    newItem["PelletSize"]= $scope.orphanTCDSKU.PelletSize;
+    newItem["BoreSize"]= $scope.orphanTCDSKU.BoreSize;
+    newItem["CaseSize"]= $scope.orphanTCDSKU.CaseSize;
+    newItem["CaseType"]= $scope.orphanTCDSKU.CaseType;
+    newItem["Rate"]= $scope.orphanTCDSKU.Rate;
     items.splice(items.length, 0, angular.copy(newItem));
-    $scope.orphanRateItem.Name = "";
-    $scope.orphanRateItem.Rate = "";
+    $scope.orphanTCDSKU.PelletSize = "";
+    $scope.orphanTCDSKU.BoreSize = "";
+    $scope.orphanTCDSKU.CaseSize = "";
+    $scope.orphanTCDSKU.CaseType = "";
+    $scope.orphanTCDSKU.Rate = "";
+    }
+
+    $scope.addMSCSKUItem = function() {
+      var items = $scope.purchaser.SKUs;
+      var newItem = {}
+      newItem["Type"]= "MSC";
+      newItem["Name"]= $scope.orphanMSCSKU.Name;
+      newItem["Unit"]= $scope.orphanMSCSKU.Unit;
+      newItem["Rate"]= $scope.orphanMSCSKU.Rate;
+      items.splice(items.length, 0, angular.copy(newItem));
+      $scope.orphanMSCSKU.Name = "";
+      $scope.orphanMSCSKU.Unit = "";
+      $scope.orphanMSCSKU.Rate = "";
+    }
+
+    $scope.removeSKUItem = function(index) {
+      $scope.purchaser.SKUs.splice(index, 1);
     }
 
     init();
@@ -72,7 +96,7 @@ appMod.controller('NewPurchasersController', ['$scope', 'PURCHASERS', function($
           $scope.purchaser.DispatchEmails = "ashishthedev@gmail.com";
           $scope.purchaser.FORMCEmails = "ashishthedev@gmail.com";
           $scope.purchaser.TinNumber = "abcdefghijk";
-          $scope.purchaser.BillingAddress = "This is going to be the billing address";
+          $scope.purchaser.BillingAddress = "This is going to be the billing address. sdlkfjlsdkf glskdfg dlksfj glskdfjglksdfjglskdfjg lskdjfg lskdjfgld f";
           $scope.purchaser.DeliveryAddress = "This is going to be the delivery address";
           $scope.purchaser.City = "This is going to be the City";
           $scope.purchaser.State = "This is going to be the state";
@@ -82,10 +106,11 @@ appMod.controller('NewPurchasersController', ['$scope', 'PURCHASERS', function($
           $scope.purchaser.MDPhoneNumbers = "+919971008002";
           $scope.purchaser.CreditDays = 45;
           $scope.purchaser.Remarks = "These will be remarks";
-          $scope.purchaser.Rates = [{"Type": "TCD", "Name":"10x08", "Rate":180},
-            {"Type":"TCD", "Name":"13x10", "Rate":300},
-            {"Type":"Misc", "Name":"Boron Carbide 150mesh 100gm", "Rate": 600},
-            ];
+          $scope.purchaser.SKUs = [
+          {"Type": "TCD", "PelletSize":"10x08", "BoreSize":"1.25", "CaseSize":"43x28", "CaseType": "Straight", "Rate":180},
+          {"Type": "TCD", "PelletSize":"13x10", "BoreSize":"2.45", "CaseSize":"43x28", "CaseType": "Taper", "Rate":310},
+          {"Type":"MSC", "Name":"Boron Carbide 150mesh 100gm", "Unit":"Pack", "Rate": 600},
+          ];
 
           $scope.working = false;
         }
@@ -100,7 +125,7 @@ appMod.controller('NewPurchasersController', ['$scope', 'PURCHASERS', function($
             $scope.working = false;
             });
       }
-      $scope.rateItemTypes = [{"Type":"TCD", "DisplayName":"TC Die"}, {"Type":"MSC", "DisplayName":"Misc"}]
+      $scope.casingTypes = DefaultCaseTypes();
     }
 
 
@@ -130,7 +155,7 @@ appMod.controller('NewPurchasersController', ['$scope', 'PURCHASERS', function($
         <div class="form-group">
           <label for="Name" class="col-xs-2 control-label">Purchaser Name</label>
           <div class="col-xs-10">
-            <input type="text" class="form-control" id="Name" ng-model="purchaser.Name" placeholder="Purchaser Name...">
+            <input type="text" class="form-control input-lg" id="Name" ng-model="purchaser.Name" placeholder="Purchaser Name...">
           </div>
         </div>
         <div class="form-group">
@@ -210,37 +235,88 @@ appMod.controller('NewPurchasersController', ['$scope', 'PURCHASERS', function($
 
     <form class="form-horizontal">
       <fieldset>
-        <legend>Rates</legend>
-        <div class="form-group" ng-repeat="i in purchaser.Rates">
-          <label for="||i.Name||-id" class="col-xs-2 control-label">||i.Name||</label>
-          <div class="col-xs-10">
-            <input type="text" class="form-control" id="||i.Name||-id" ng-model="i.Rate">
+
+        <legend>Rates Dies</legend>
+        <div class="form-group" ng-repeat="s in purchaser.SKUs">
+          <div ng-if='s.Type=="TCD"'>
+            <label for="$index-id" class="col-xs-2 control-label">||s.PelletSize||-||s.BoreSize||-||s.CaseSize||-||s.CaseType||</label>
+            <div class="col-xs-9">
+              <input type="text" class="form-control" id="$index-id" ng-model="s.Rate">
+            </div>
+            <div class="col-xs-1">
+              <button class="form-control btn btn-danger" ng-click="removeSKUItem($index)">X</button>
+            </div>
           </div>
         </div>
 
-        <div class="form-group">
-          <div class="col-xs-10">
-            <div class="row">
+        <div class="form-group"> <!-- form-group -->
+          <div class="container">
+            <div class="row"> <!-- TC Die row-->
               <div class="col-xs-4">
-                <select ng-model="orphanRateItem.Type" class="form-control" ng-options="t.Type as t.DisplayName for t in rateItemTypes">
+                <input type="text" class="form-control" ng-model="orphanTCDSKU.PelletSize" placeholder="PelletSize...">
+              </div>
+              <div class="col-xs-4">
+                <input type="text" class="form-control" ng-model="orphanTCDSKU.BoreSize" placeholder="BoreSize...">
+              </div>
+              <div class="col-xs-4">
+                <input type="text" class="form-control" ng-model="orphanTCDSKU.CaseSize" placeholder="CaseSize...">
+              </div>
+              <div class="col-xs-4">
+                <select ng-model="orphanTCDSKU.CaseType" class="form-control" ng-options="t as t for t in casingTypes">
                   <option value='' disabled selected style='display:none;'></option>
                 </select>
               </div>
               <div class="col-xs-4">
-                <input type="text" class="form-control" ng-model="orphanRateItem.Name" placeholder="Name...">
+                <input type="number" class="form-control" ng-model="orphanTCDSKU.Rate" placeholder="Rate...">
               </div>
-              <div class="col-xs-4">
-                <input type="number" class="form-control" ng-model="orphanRateItem.Rate" placeholder="Rate...">
+              <div class="col-xs-1 pull-right">
+                <button class="form-control btn btn-info" ng-click="addTCDSKUItem()">+</button>
               </div>
+            </div> <!-- TC Die row -->
+          </div>
+
+        </div> <!-- form-group -->
+
+      </fieldset>
+    </form>
+
+    <form class="form-horizontal">
+      <fieldset>
+        <legend>Rates Misc</legend>
+        <div class="form-group" ng-repeat="s in purchaser.SKUs">
+          <div ng-if='s.Type=="MSC"'>
+            <label for="||s.Name||-id" class="col-xs-2 control-label">||s.Name||-||s.Unit||</label>
+            <div class="col-xs-9">
+              <input type="text" class="form-control" id="||i.Name||-id" ng-model="s.Rate">
+            </div>
+            <div class="col-xs-1">
+              <button class="form-control btn btn-danger" ng-click="removeSKUItem($index)">X</button>
             </div>
           </div>
-          <div class="col-xs-2">
-            <button class="form-control btn btn-info" ng-click="addRateItem()">Add Item</button>
+        </div>
+
+        <div class="form-group">
+          <div class="container">
+            <div class="row"> <!-- Misc row-->
+              <div class="col-xs-4">
+                <input type="text" class="form-control" ng-model="orphanMSCSKU.Name" placeholder="Name...">
+              </div>
+              <div class="col-xs-3">
+                <input type="text" class="form-control" ng-model="orphanMSCSKU.Unit" placeholder="Unit...">
+              </div>
+              <div class="col-xs-4">
+                <input type="number" class="form-control" ng-model="orphanMSCSKU.Rate" placeholder="Rate...">
+              </div>
+              <div class="col-xs-1">
+                <button class="form-control btn btn-info" ng-click="addMSCSKUItem()">+</button>
+              </div>
+            </div> <!-- Msic row -->
           </div>
         </div>
 
       </fieldset>
     </form>
+
     <div class="form-group">
       <div class="col-xs-10 col-xs-offset-2">
         <button type="reset" class="btn btn-default">Cancel</button>

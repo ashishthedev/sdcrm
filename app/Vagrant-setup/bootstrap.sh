@@ -16,6 +16,12 @@ GAE_BASE=/opt
 GAE=go_appengine
 GAE_DIR=$GAE_BASE/$GAE
 
+
+cat >> /etc/sysctl.conf <<EOL
+#This is to fix the inotify issues in vagrant
+fs.inotify.max_user_watches=1048576
+EOL
+
 if [ -f "$PROVISIONED_ON" ]
 	then
 	echo "___________________________"

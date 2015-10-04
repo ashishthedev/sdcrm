@@ -9,8 +9,6 @@ Q Get("/api/orders/") -> Get all orders
 */
 
 import (
-	"appengine"
-	"appengine/datastore"
 	"encoding/json"
 	"fmt"
 	"html/template"
@@ -18,21 +16,12 @@ import (
 	"net/http"
 	"strconv"
 	"time"
+
+	"appengine"
+	"appengine/datastore"
 )
 
 const ORDERS_API = "/api/orders/"
-
-type Item struct {
-	Type         string  `json:"Type"`
-	FriendlyName string  `json:"FriendlyName"`
-	Remarks      string  `json:"Remarks"`
-	PelletSize   string  `json:"PelletSize"`
-	Unit         string  `json:"Unit"`
-	BoreSize     float64 `json:"BoreSize"`
-	CasingType   string  `json:"CasingType"`
-	CasingSize   string  `json:"CasingSize"`
-	Qty          int64   `json:"Qty"`
-}
 
 type OrderId int64
 

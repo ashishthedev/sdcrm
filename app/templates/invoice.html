@@ -40,9 +40,9 @@ appMod.controller('NewInvoicesController', ['$scope', 'INVOICES', function($scop
     $scope.availableSuppliers = ["Standard", "Omega"];
     $scope.availableCompanies = ["Precision Drawell", "Mohinder"];
     }
-    $scope.DefaultCasingTypes=["Straight", "Taper"];
+    $scope.DefaultCaseTypes=["Straight", "Taper"];
     $scope.DefaultPelletSizes=["10x08", "13x10", "15x13", "17x15", "19x17", "22x18", "25x20", "30x24", "35x24"];
-    $scope.DefaultCasingSizes=["28x16", "28x20", "38x26", "40x28", "43x28", "50x35", "53x35", "70x40"];
+    $scope.DefaultCaseSizes=["28x16", "28x20", "38x26", "40x28", "43x28", "50x35", "53x35", "70x40"];
 
     $scope.DateChanged = function() {
     var today = new Date();
@@ -73,13 +73,13 @@ appMod.controller('NewInvoicesController', ['$scope', 'INVOICES', function($scop
       var o = $scope.orphan.TCDO;
       var newItem = {};
       newItem.Type = "TCD";
-      newItem.FriendlyName = "TCDie";
+      newItem.Name = "TCDie";
       newItem.Remarks = o.Remarks;
       newItem.PelletSize = o.PelletSize;
       newItem.Unit = "pc";
       newItem.BoreSize = o.BoreSize;
-      newItem.CasingType = o.CasingType;
-      newItem.CasingSize = o.CasingSize;
+      newItem.CaseType = o.CaseType;
+      newItem.CaseSize = o.CaseSize;
       newItem.Qty = o.Qty;
       items.splice(items.length, 0, angular.copy(newItem));
       $scope.updateTotalQty();
@@ -93,7 +93,7 @@ appMod.controller('NewInvoicesController', ['$scope', 'INVOICES', function($scop
       var newItem = {};
       newItem.Type = "Misc"
         newItem.Unit = o.Unit;
-      newItem.FriendlyName = o.FriendlyName;
+      newItem.Name = o.Name;
       newItem.Remarks = o.Remarks;
       newItem.Qty = o.Qty;
       items.splice(items.length, 0, angular.copy(newItem));
@@ -123,7 +123,7 @@ appMod.controller('NewInvoicesController', ['$scope', 'INVOICES', function($scop
       $scope.invoice.Items = [];
 
       if(NewOrEdit == "NEW"){
-      $scope.working = true;
+        $scope.working = true;
         $scope.invoice.Date = new Date();
         if (Debug()){
           $scope.invoice.PurchaserName = "Precision Drawell";
@@ -133,15 +133,15 @@ appMod.controller('NewInvoicesController', ['$scope', 'INVOICES', function($scop
 
           $scope.orphan.Misc.Remarks="Misc Remarks";
           $scope.orphan.Misc.Qty = parseInt(2);
-          $scope.orphan.Misc.FriendlyName = "Boron Carbide";
+          $scope.orphan.Misc.Name = "Boron Carbide";
           $scope.orphan.Misc.Unit = "gm";
 
           $scope.orphan.TCDO.Remarks="TCDO Remarks";
           $scope.orphan.TCDO.Qty = parseInt(10001);
-          $scope.orphan.TCDO.FriendlyName = "TC Die";
+          $scope.orphan.TCDO.Name = "TC Die";
           $scope.orphan.TCDO.PelletSize = "10x08";
-          $scope.orphan.TCDO.CasingSize = "28x20";
-          $scope.orphan.TCDO.CasingType = "Straight";
+          $scope.orphan.TCDO.CaseSize = "28x20";
+          $scope.orphan.TCDO.CaseType = "Straight";
           $scope.orphan.TCDO.BoreSize = parseFloat(0.88);
 
 
@@ -224,7 +224,7 @@ appMod.controller('NewInvoicesController', ['$scope', 'INVOICES', function($scop
                   <tr>
                     <th>Item</th>
                     <th>Pellet</th>
-                    <th>Casing</th>
+                    <th>Case</th>
                     <th>Type</th>
                     <th>Bore</th>
                     <th>Qty</th>
@@ -247,10 +247,10 @@ appMod.controller('NewInvoicesController', ['$scope', 'INVOICES', function($scop
                   </tr>
                 </tfoot>
                 <tr ng-repeat="item in invoice.Items">
-                  <td><span ng-bind="item.FriendlyName"></span></td>
+                  <td><span ng-bind="item.Name"></span></td>
                   <td><span ng-bind="item.PelletSize"></span></td>
-                  <td><span ng-bind="item.CasingSize"></span></td>
-                  <td><span ng-bind="item.CasingType"></span></td>
+                  <td><span ng-bind="item.CaseSize"></span></td>
+                  <td><span ng-bind="item.CaseType"></span></td>
                   <td><span ng-bind="item.BoreSize"></span></td>
                   <td><span ng-bind="item.Qty"></span></td>
                   <td><span ng-bind="item.Unit"></span></td>
@@ -290,27 +290,27 @@ appMod.controller('NewInvoicesController', ['$scope', 'INVOICES', function($scop
               </div>
             </div>
           </div> <!-- Pellet Row -->
-          <div class="col-xs-12"><!-- Casing Row -->
+          <div class="col-xs-12"><!-- Case Row -->
             <div class="row">
               <div class="col-xs-10">
-                <select ng-model="orphan.TCDO.CasingSize" class="form-control" ng-options="k as k for k in DefaultCasingSizes">
+                <select ng-model="orphan.TCDO.CaseSize" class="form-control" ng-options="k as k for k in DefaultCaseSizes">
                   <option value='' disabled selected style='display:none;'>..........</option>
                 </select>
               </div>
               <div class="col-xs-2">
-                <a class="form-control btn btn-link" ng-click="CreateCasingSize()"> + (TODO)</a>
+                <a class="form-control btn btn-link" ng-click="CreateCaseSize()"> + (TODO)</a>
               </div>
             </div>
-          </div><!-- Casing Row -->
+          </div><!-- Case Row -->
           <div class="col-xs-6">
             <label>
-              <input type="radio" ng-model="orphan.TCDO.CasingType" value="Straight">
+              <input type="radio" ng-model="orphan.TCDO.CaseType" value="Straight">
               Straight
             </label>
           </div>
           <div class="col-xs-6">
             <label>
-              <input type="radio" ng-model="orphan.TCDO.CasingType"value="Taper">
+              <input type="radio" ng-model="orphan.TCDO.CaseType"value="Taper">
               Taper
             </label>
           </div>
@@ -336,7 +336,7 @@ appMod.controller('NewInvoicesController', ['$scope', 'INVOICES', function($scop
           <div class="container">
             <div class="row">
               <div class="col-xs-5">
-                <input required ng-model="orphan.Misc.FriendlyName" type="text" class="form-control" placeholder="Item..."></input>
+                <input required ng-model="orphan.Misc.Name" type="text" class="form-control" placeholder="Item..."></input>
               </div>
 
               <div class="col-xs-5">

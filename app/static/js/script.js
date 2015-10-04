@@ -66,27 +66,14 @@ function Debug(){
 }
 
 
-var regexIso8601 = /^(\d{4}|\+\d{6})(?:-(\d{2})(?:-(\d{2})(?:T(\d{2}):(\d{2}):(\d{2})\.(\d{1,})(Z|([\-+])(\d{2}):(\d{2}))?)?)?)?$/;
-
-function convertDateStringsToDates(input) {
-    // Ignore things that aren't objects.
-    if (typeof input !== "object") return input;
-
-    for (var key in input) {
-        if (!input.hasOwnProperty(key)) continue;
-
-        var value = input[key];
-        var match;
-        // Check for string properties which look like dates.
-        if (typeof value === "string" && (match = value.match(regexIso8601))) {
-            var milliseconds = Date.parse(match[0])
-            if (!isNaN(milliseconds)) {
-                input[key] = new Date(milliseconds);
-            }
-        } else if (typeof value === "object") {
-            // Recurse into object
-            convertDateStringsToDates(value);
-        }
-    }
+function DefaultCaseTypes(){
+  return ["Straight", "Taper"];
 }
 
+function DefaultPelletSizes() {
+  return ["10x08", "13x10", "15x13", "17x15", "19x17", "22x18", "25x20", "30x24", "35x24"];
+}
+
+function DefaultCaseSizes() {
+  return ["28x16", "28x20", "38x26", "40x28", "43x28", "50x35", "53x35", "70x40"];
+}

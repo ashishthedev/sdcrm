@@ -9,8 +9,6 @@ Q Get("/api/purchasers/") -> Get all purchasers
 */
 
 import (
-	"appengine"
-	"appengine/datastore"
 	"encoding/json"
 	"fmt"
 	"html/template"
@@ -18,6 +16,9 @@ import (
 	"net/http"
 	"strconv"
 	"time"
+
+	"appengine"
+	"appengine/datastore"
 )
 
 const PURCHASERS_API = "/api/purchasers/"
@@ -26,7 +27,7 @@ type PurchaserId int64
 
 type Purchaser struct {
 	Id            PurchaserId `json:"Id" datastore:"-"`
-	Items         []Item      `json:"Items"`
+	SKUs          []SKU       `json:"SKUs"`
 	Created       time.Time   `json:"Created"`
 	Date          time.Time   `json:"Date"`
 	TotalQty      int64       `json:"TotalQty"`
