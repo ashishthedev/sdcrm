@@ -74,7 +74,7 @@ appMod.controller('NewInvoicesController', ['$scope', 'INVOICES', function($scop
       var newItem = {};
       newItem.Type = "TCD";
       newItem.Name = "TCDie";
-      newItem.Remarks = o.Remarks;
+      newItem.CRemarks = o.CRemarks;
       newItem.PelletSize = o.PelletSize;
       newItem.Unit = "pc";
       newItem.BoreSize = o.BoreSize;
@@ -94,7 +94,7 @@ appMod.controller('NewInvoicesController', ['$scope', 'INVOICES', function($scop
       newItem.Type = "Misc"
         newItem.Unit = o.Unit;
       newItem.Name = o.Name;
-      newItem.Remarks = o.Remarks;
+      newItem.CRemarks = o.CRemarks;
       newItem.Qty = o.Qty;
       items.splice(items.length, 0, angular.copy(newItem));
       $scope.updateTotalQty();
@@ -131,12 +131,12 @@ appMod.controller('NewInvoicesController', ['$scope', 'INVOICES', function($scop
           $scope.invoice.Date = new Date();
           $scope.invoice.Number = "111";
 
-          $scope.orphan.Misc.Remarks="Misc Remarks";
+          $scope.orphan.Misc.CRemarks="Misc Remarks";
           $scope.orphan.Misc.Qty = parseInt(2);
           $scope.orphan.Misc.Name = "Boron Carbide";
           $scope.orphan.Misc.Unit = "gm";
 
-          $scope.orphan.TCDO.Remarks="TCDO Remarks";
+          $scope.orphan.TCDO.CRemarks="TCDO Remarks";
           $scope.orphan.TCDO.Qty = parseInt(10001);
           $scope.orphan.TCDO.Name = "TC Die";
           $scope.orphan.TCDO.PelletSize = "10x08";
@@ -254,7 +254,7 @@ appMod.controller('NewInvoicesController', ['$scope', 'INVOICES', function($scop
                   <td><span ng-bind="item.BoreSize"></span></td>
                   <td><span ng-bind="item.Qty"></span></td>
                   <td><span ng-bind="item.Unit"></span></td>
-                  <td><span ng-bind="item.Remarks"></span></td>
+                  <td><span ng-bind="item.CRemarks"></span></td>
                   <td><button ng-click="removeInvoiceEntry($index)" class="btn btn-sm btn-danger pull-right">X</button></td>
                 </tr>
 
@@ -321,7 +321,7 @@ appMod.controller('NewInvoicesController', ['$scope', 'INVOICES', function($scop
             <input required ng-model="orphan.TCDO.Qty" type="number" class="form-control" placeholder="Qty"></input>
           </div>
           <div class="col-xs-12">
-            <input ng-model="orphan.TCDO.Remarks" type="text" class="form-control" placeholder="Remarks if any..."></input>
+            <input ng-model="orphan.TCDO.CRemarks" type="text" class="form-control" placeholder="Remarks if any..."></input>
           </div>
           <div class="col-xs-12">
             <button class="form-control btn btn-warning btn-mini btn-block">Add Die</button>
@@ -348,7 +348,7 @@ appMod.controller('NewInvoicesController', ['$scope', 'INVOICES', function($scop
             </div>
             <div class="row">
               <div class="col-xs-12">
-                <input ng-model="orphan.Misc.Remarks" type="text" class="form-control" placeholder="Remarks if any..."></input>
+                <input ng-model="orphan.Misc.CRemarks" type="text" class="form-control" placeholder="Remarks if any..."></input>
               </div>
             </div>
             <div class="row">

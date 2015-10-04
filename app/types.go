@@ -15,12 +15,12 @@ type MiscItem struct {
 type SKU struct {
 	TCDieItem
 	MiscItem
-	Rate float64 `json:"Rate"`
-	Type string  `json:"Type"` //TCD or MSC
+	Rate     float64 `json:"Rate"`
+	Type     string  `json:"Type"` //TCD or MSC
+	CRemarks string  `json:"CRemarks"`
 }
 
 type Item struct {
-	SKU     SKU
-	Qty     int64  `json:"Qty"`
-	Remarks string `json:"Remarks"`
+	SKU SKU
+	Qty int64 `json:"Qty"`
 }
