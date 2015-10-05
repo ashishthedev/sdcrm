@@ -40,7 +40,7 @@ appMod.config(function($interpolateProvider) {
 appMod.controller('NewPurchasersController', ['$scope', 'PURCHASERS', function($scope, PURCHASERS) {
     var NewOrEdit = {{.Nature }};
 
-    $scope.registerPurchaser = function() {
+    $scope.RegisterPurchaser = function() {
     $scope.working = true;
     PURCHASERS.save($scope.purchaser).$promise.then(function(purchaser){
       $scope.statusNote = "Purchaser saved with id: " + purchaser.Id;
@@ -105,10 +105,10 @@ appMod.controller('NewPurchasersController', ['$scope', 'PURCHASERS', function($
           $scope.purchaser.SMSPhoneNumbers = "+919971008002";
           $scope.purchaser.MDPhoneNumbers = "+919971008002";
           $scope.purchaser.CreditDays = 45;
-          $scope.purchaser.Remarks = "These will be remarks";
+          $scope.purchaser.CRemarks = "These will be remarks";
           $scope.purchaser.SKUs = [
-          {"Type": "TCD", "PelletSize":"10x08", "BoreSize":"1.25", "CaseSize":"43x28", "CaseType": "Straight", "Rate":180},
-          {"Type": "TCD", "PelletSize":"13x10", "BoreSize":"2.45", "CaseSize":"43x28", "CaseType": "Taper", "Rate":310},
+          {"Type": "TCD", "PelletSize":"10x08", "BoreSize":1.25, "CaseSize":"43x28", "CaseType": "Straight", "Rate":180},
+          {"Type": "TCD", "PelletSize":"13x10", "BoreSize":2.45, "CaseSize":"43x28", "CaseType": "Taper", "Rate":310},
           {"Type":"MSC", "Name":"Boron Carbide 150mesh 100gm", "Unit":"Pack", "Rate": 600},
           ];
 
@@ -148,7 +148,7 @@ appMod.controller('NewPurchasersController', ['$scope', 'PURCHASERS', function($
 </div> <!-- show=working -->
 
 <div ng-show="!working"> <!-- show=!working -->
-  <div class="container">
+  <div class="container"><!-- container -->
     <form class="form-horizontal">
       <fieldset>
 
@@ -227,7 +227,7 @@ appMod.controller('NewPurchasersController', ['$scope', 'PURCHASERS', function($
         <div class="form-group">
           <label for="Remarks" class="col-xs-2 control-label">Remarks</label>
           <div class="col-xs-10">
-            <input type="text" class="form-control" id="Remarks" ng-model="purchaser.Remarks" placeholder="Remarks...">
+            <input type="text" class="form-control" id="Remarks" ng-model="purchaser.CRemarks" placeholder="Conf Remarks...">
           </div>
         </div>
       </fieldset>
@@ -239,9 +239,15 @@ appMod.controller('NewPurchasersController', ['$scope', 'PURCHASERS', function($
         <legend>Rates Dies</legend>
         <div class="form-group" ng-repeat="s in purchaser.SKUs">
           <div ng-if='s.Type=="TCD"'>
-            <label for="$index-id" class="col-xs-2 control-label">||s.PelletSize||-||s.BoreSize||-||s.CaseSize||-||s.CaseType||</label>
-            <div class="col-xs-9">
-              <input type="text" class="form-control" id="$index-id" ng-model="s.Rate">
+            <label class="col-xs-2 control-label">||s.BoreSize||--||s.PelletSize||--||s.CaseSize||--||s.CaseType||</label>
+            <div class="col-xs-4">
+              <span class="input-group">
+                <span class="input-group-addon">&#8377;</span>
+                <input type="text" class="form-control" ng-model="s.Rate">
+              </span>
+            </div>
+            <div class="col-xs-5">
+              <input type="text" class="form-control" ng-model="s.CRemarks">
             </div>
             <div class="col-xs-1">
               <button class="form-control btn btn-danger" ng-click="removeSKUItem($index)">X</button>
@@ -249,8 +255,10 @@ appMod.controller('NewPurchasersController', ['$scope', 'PURCHASERS', function($
           </div>
         </div>
 
+        <hr>
+
         <div class="form-group"> <!-- form-group -->
-          <div class="container">
+          <div class="col-xs-10 col-xs-offset-2">
             <div class="row"> <!-- TC Die row-->
               <div class="col-xs-4">
                 <input type="text" class="form-control" ng-model="orphanTCDSKU.PelletSize" placeholder="PelletSize...">
@@ -266,10 +274,13 @@ appMod.controller('NewPurchasersController', ['$scope', 'PURCHASERS', function($
                   <option value='' disabled selected style='display:none;'></option>
                 </select>
               </div>
-              <div class="col-xs-4">
-                <input type="number" class="form-control" ng-model="orphanTCDSKU.Rate" placeholder="Rate...">
+              <div class="col-xs-8">
+                <span class="input-group">
+                  <span class="input-group-addon">&#8377;</span>
+                  <input type="number" class="form-control" ng-model="orphanTCDSKU.Rate" placeholder="Rate...">
+                </span>
               </div>
-              <div class="col-xs-4">
+              <div class="col-xs-11">
                 <input type="text" class="form-control" ng-model="orphanTCDSKU.CRemarks" placeholder="Conf remarks if any...">
               </div>
               <div class="col-xs-1 pull-right">
@@ -288,9 +299,15 @@ appMod.controller('NewPurchasersController', ['$scope', 'PURCHASERS', function($
         <legend>Rates Misc</legend>
         <div class="form-group" ng-repeat="s in purchaser.SKUs">
           <div ng-if='s.Type=="MSC"'>
-            <label for="||s.Name||-id" class="col-xs-2 control-label">||s.Name||-||s.Unit||</label>
-            <div class="col-xs-9">
-              <input type="text" class="form-control" id="||i.Name||-id" ng-model="s.Rate">
+            <label class="col-xs-2 control-label">||s.Name||-||s.Unit||</label>
+            <div class="col-xs-4">
+              <span class="input-group">
+                <span class="input-group-addon">&#8377;</span>
+                <input type="text" class="form-control" ng-model="s.Rate">
+              </span>
+            </div>
+            <div class="col-xs-5">
+              <input type="text" class="form-control" ng-model="s.CRemarks">
             </div>
             <div class="col-xs-1">
               <button class="form-control btn btn-danger" ng-click="removeSKUItem($index)">X</button>
@@ -298,22 +315,27 @@ appMod.controller('NewPurchasersController', ['$scope', 'PURCHASERS', function($
           </div>
         </div>
 
+        <hr>
+
         <div class="form-group">
-          <div class="container">
+          <div class="col-xs-10 col-xs-offset-2">
             <div class="row"> <!-- Misc row-->
-              <div class="col-xs-4">
+              <div class="col-xs-6">
                 <input type="text" class="form-control" ng-model="orphanMSCSKU.Name" placeholder="Name...">
               </div>
-              <div class="col-xs-4">
+              <div class="col-xs-6">
                 <input type="text" class="form-control" ng-model="orphanMSCSKU.Unit" placeholder="Unit...">
               </div>
-              <div class="col-xs-4">
-                <input type="number" class="form-control" ng-model="orphanMSCSKU.Rate" placeholder="Rate...">
+              <div class="col-xs-12">
+                <span class="input-group">
+                  <span class="input-group-addon">&#8377;</span>
+                  <input type="number" class="form-control" ng-model="orphanMSCSKU.Rate" placeholder="Rate...">
+                </span>
               </div>
-              <div class="col-xs-4">
+              <div class="col-xs-11">
                 <input type="text" class="form-control" ng-model="orphanMSCSKU.CRemarks" placeholder="Conf Remarks if any...">
               </div>
-              <div class="col-xs-1 pull-right">
+              <div class="col-xs-1">
                 <button class="form-control btn btn-info" ng-click="addMSCSKUItem()">+</button>
               </div>
             </div> <!-- Msic row -->
@@ -324,12 +346,15 @@ appMod.controller('NewPurchasersController', ['$scope', 'PURCHASERS', function($
     </form>
 
     <div class="form-group">
-      <div class="col-xs-10 col-xs-offset-2">
-        <button type="reset" class="btn btn-default">Cancel</button>
-        <button type="submit" class="btn btn-primary">Submit</button>
+      <div class="row">
+        <div class="col-xs-10 col-xs-offset-2">
+          <button type="submit" class="form-control btn btn-primary" ng-click="RegisterPurchaser()">Submit</button>
+        </div>
       </div>
     </div>
-  </div> <!-- container -->
+
+  </div><!-- container -->
+
 </div> <!-- show=!working -->
 </body>
 </html>

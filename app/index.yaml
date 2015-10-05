@@ -19,3 +19,8 @@ indexes:
   ancestor: yes
   properties:
   - name: Created
+
+- kind: Purchaser
+  ancestor: yes
+  properties:
+  - name: Created

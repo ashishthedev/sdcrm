@@ -23,19 +23,8 @@ import (
 
 const PURCHASERS_API = "/api/purchasers/"
 
+type CSL string //Comma or Semicolon separated list
 type PurchaserId int64
-
-type Purchaser struct {
-	Id            PurchaserId `json:"Id" datastore:"-"`
-	SKUs          []SKU       `json:"SKUs"`
-	Created       time.Time   `json:"Created"`
-	Date          time.Time   `json:"Date"`
-	TotalQty      int64       `json:"TotalQty"`
-	PurchaserName string      `json:"PurchaserName"`
-	SupplierName  string      `json:"SupplierName"`
-	Number        string      `json:"Number"`
-	OrdersId      []OrderId   `json:"OrdersId"`
-}
 
 func init() {
 	http.Handle(PURCHASERS_API, gaeHandler(purchaserHandler))
