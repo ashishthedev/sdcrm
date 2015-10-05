@@ -21,3 +21,8 @@ services.factory('PURCHASERS', ['$resource', function($resource){
     return $resource('/api/purchasers/:id',{},{
     });
   }]);
+
+services.factory('SKUS', ['$resource', function($resource){
+    return $resource('/api/skus/purchaser/:id',{},{
+    });
+  }]);

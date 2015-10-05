@@ -103,6 +103,7 @@ func (o *Purchaser) key(c appengine.Context) *datastore.Key {
 }
 
 func getAllPurchasers(c appengine.Context) ([]Purchaser, error) {
+	//TODO: If performance is slow we should consider projection queries here. But not solving the problem now as pre-optimization is the root cause of all evil.
 	purchasers := []Purchaser{}
 	ks, err := datastore.NewQuery("Purchaser").Ancestor(defaultPurchaserList(c)).Order("Created").GetAll(c, &purchasers)
 	if err != nil {
