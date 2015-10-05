@@ -5,10 +5,10 @@ import (
 )
 
 type TCDieItem struct {
-	PelletSize string  `json:"PelletSize"`
-	BoreSize   float64 `json:"BoreSize"`
-	CaseType   string  `json:"CaseType"`
-	CaseSize   string  `json:"CaseSize"`
+	PelletSize string `json:"PelletSize"`
+	BoreSize   string `json:"BoreSize"`
+	CaseType   string `json:"CaseType"`
+	CaseSize   string `json:"CaseSize"`
 }
 
 type MiscItem struct {

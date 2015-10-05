@@ -32,6 +32,10 @@ appMod.config(['$resourceProvider', function($resourceProvider) {
     // Don't strip trailing slashes from calculated URLs
     $resourceProvider.defaults.stripTrailingSlashes = false;
     }]);
+appMod.config(function($interpolateProvider) {
+    $interpolateProvider.startSymbol('||');
+    $interpolateProvider.endSymbol('||');
+    });
 
 appMod.controller('NewOrdersController', ['$scope', 'ORDERS', 'SKUS', 'PURCHASERS', function($scope, ORDERS, SKUS, PURCHASERS) {
     var NewOrEdit = {{.Nature }};
@@ -71,31 +75,20 @@ appMod.controller('NewOrdersController', ['$scope', 'ORDERS', 'SKUS', 'PURCHASER
       $scope.order.PurchaserId = $scope.selectedPurchaser.Id;
     }
 
-    $scope.addSKUTCDAsOrder = function(sku){
+    $scope.addSKUAsTCDOrder = function(sku){
       var items = $scope.order.Items;
-      var newItem = {};
-      newItem.Type = sku.Type;
+      var newItem = angular.copy(sku);
       newItem.Name = "TCDie";
-      newItem.CRemarks = sku.CRemarks;
-      newItem.PelletSize = sku.PelletSize;
       newItem.Unit = "pc";
-      newItem.BoreSize = sku.BoreSize;
-      newItem.CaseType = sku.CaseType;
-      newItem.CaseSize = sku.CaseSize;
       newItem.Qty = sku.Qty;
       items.splice(items.length, 0, angular.copy(newItem));
       $scope.updateTotalQty();
     }
 
-    $scope.AddMiscOrphanRowInOrder = function(){
+    $scope.addSKUAsMSCOrder = function(sku){
       var items = $scope.order.Items;
-      var o = $scope.orphan.Misc;
-      var newItem = {};
-      newItem.Type = "Misc";
-      newItem.Unit = o.Unit;
-      newItem.Name = o.Name;
-      newItem.CRemarks = o.CRemarks;
-      newItem.Qty = o.Qty;
+      var newItem = angular.copy(sku);
+      newItem.Qty = sku.Qty;
       items.splice(items.length, 0, angular.copy(newItem));
       $scope.updateTotalQty();
     }
@@ -117,6 +110,9 @@ appMod.controller('NewOrdersController', ['$scope', 'ORDERS', 'SKUS', 'PURCHASER
       PURCHASERS.query().$promise.then(function(purchasers){
           $scope.working = false;
           $scope.purchasers = purchasers;
+          if (Debug()){
+          $scope.selectedPurchaser = $scope.purchasers[0];
+          }
           }, function(error){
           $scope.statusNote = error.status + ": " + error.data;
           $scope.working = false;
@@ -130,9 +126,6 @@ appMod.controller('NewOrdersController', ['$scope', 'ORDERS', 'SKUS', 'PURCHASER
     function init(){
       $scope.working = true;
       $scope.order = {};
-      $scope.orphan = {};
-      $scope.orphan.Misc = {};
-      $scope.orphan.TCDO = {};
       $scope.order.Items = [];
 
       if(NewOrEdit == "NEW"){
@@ -156,6 +149,7 @@ appMod.controller('NewOrdersController', ['$scope', 'ORDERS', 'SKUS', 'PURCHASER
             });
       }
     }
+    $scope.TCDType = "TCD1";
 
 
 }]);
@@ -235,9 +229,9 @@ appMod.controller('NewOrdersController', ['$scope', 'ORDERS', 'SKUS', 'PURCHASER
                     <td></td>
                     <td></td>
                     <td> <b><span ng-bind="order.TotalQty"></span></b> </td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
+                    <td> </td>
+                    <td> </td>
+                    <td> </td>
                   </tr>
                 </tfoot>
                 <tr ng-repeat="item in order.Items">
@@ -248,7 +242,7 @@ appMod.controller('NewOrdersController', ['$scope', 'ORDERS', 'SKUS', 'PURCHASER
                   <td><span ng-bind="item.BoreSize"></span></td>
                   <td><span ng-bind="item.Qty"></span></td>
                   <td><span ng-bind="item.Unit"></span></td>
-                  <td><span ng-bind="item.CRemarks"></span></td>
+                  <td><span ng-bind="item.CRemarks" class="red"></span></td>
                   <td><button ng-click="removeOrderEntry($index)" class="btn btn-sm btn-danger pull-right">X</button></td>
                 </tr>
 
@@ -272,61 +266,60 @@ appMod.controller('NewOrdersController', ['$scope', 'ORDERS', 'SKUS', 'PURCHASER
 
       <form>
         <div class="well">
-          <div class="panel panel-warning"> <!-- locked order panel -->
+          <div class="panel panel-warning"> <!-- sku templates panel -->
             <table class="table table-striped table-condensed panel-body">
               <thead>
                 <tr>
-                  <th>Item</th>
                   <th>Pellet</th>
                   <th>Case</th>
                   <th>Type</th>
-                  <th>Bore</th>
+                  <th>Bore/Item</th>
+                  <th>Rate</th>
+                  <th>Qty</th>
                   <th>Remarks</th>
                   <th></th>
                 </tr>
               </thead>
-              <tr ng-repeat="sku in selectedPurchaser.SKUs">
-                <div ng-if='sku.Type=="TCD"'>
-                  <td><span ng-bind="sku.Name"></span></td>
-                  <td><span ng-bind="sku.PelletSize"></span></td>
-                  <td><span ng-bind="sku.CaseSize"></span></td>
-                  <td><span ng-bind="sku.CaseType"></span></td>
-                  <td><span ng-bind="sku.BoreSize"></span></td>
-                  <td>
-                    <span class="input-group">
-                      <span class="input-group-addon">Qty</span>
-                      <input type="text" class="form-control" ng-model="sku.Qty">
-                    </span>
-                  </td>
-                  <td><span ng-bind="sku.CRemarks"></span></td>
-                  <td><button ng-click="addSKUTCDAsOrder(sku)" class="btn btn-sm btn-warning pull-right">Add</button></td>
-                </div>
-              </tr>
-              <tr ng-repeat="sku in selectedPurchaser.SKUs">
-                <div ng-if='sku.Type=="MSC"'>
-                  <td><span ng-bind="sku.Name"></span></td>
-                  <td><span ng-bind="sku.PelletSize"></span></td>
-                  <td><span ng-bind="sku.CaseSize"></span></td>
-                  <td><span ng-bind="sku.CaseType"></span></td>
-                  <td><span ng-bind="sku.BoreSize"></span></td>
-                  <td>
-                    <span class="input-group">
-                      <span class="input-group-addon">Qty</span>
-                      <input type="text" class="form-control" ng-model="sku.orderedQty">
-                    </span>
-                  </td>
-                  <td><span ng-bind="sku.CRemarks"></span></td>
-                  <td><button ng-click="addSKUAsOrder($index)" class="btn btn-sm btn-warning pull-right">Add</button></td>
-                </div>
-              </tr>
 
+              <tr ng-repeat="sku in selectedPurchaser.SKUs">
+                <td ng-if="sku.Type == 'TCD'"><span ng-bind="sku.PelletSize"></span></td>
+                <td ng-if="sku.Type == 'TCD'"><span ng-bind="sku.CaseSize"></span></td>
+                <td ng-if="sku.Type == 'TCD'"><span ng-bind="sku.CaseType"></span></td>
+                <td ng-if="sku.Type == 'TCD'"><span ng-bind="sku.BoreSize"></span></td>
+                <td ng-if="sku.Type == 'TCD'"><span>&#8377;</span><span ng-bind="sku.Rate"></span></td>
+                <td ng-if="sku.Type == 'TCD'"> <span class="input-group"> <span class="input-group-addon">Qty</span> <input type="number" class="form-control col-xs-8" ng-model="sku.Qty"> </span> </td>
+                <td ng-if="sku.Type == 'TCD'"><span ng-bind="sku.CRemarks"></span></td>
+                <td ng-if="sku.Type == 'TCD'"><button ng-click="addSKUAsTCDOrder(sku)" class="btn btn-sm btn-warning pull-right">Add</button></td>
+              </tr>
             </table>
-          </div> <!-- locked order panel -->
+          </div> <!-- sku templates panel -->
+        </div><!-- well-->
+      </form>
+      <form>
+        <div class="well">
+          <div class="panel panel-warning"> <!-- sku templates panel -->
+            <table class="table table-striped table-condensed panel-body">
+              <thead>
+                <tr>
+                  <th>Item</th>
+                  <th>Unit</th>
+                  <th>Rate</th>
+                  <th>Qty</th>
+                  <th>Remarks</th>
+                  <th></th>
+                </tr>
+              </thead>
 
-          <div class="col-xs-4">
-            <span ng-bind="sku.BoreSize"></span>--<span ng-bind="sku.PelletSize"></span>--<span ng-bind="sku.CaseSize"></span>--<span ng-bind="sku.CaseType"></span>--<span ng-bind="sku.Rate"></span>
-          </div>
-
+              <tr ng-repeat="sku in selectedPurchaser.SKUs">
+                <td ng-if="sku.Type == 'MSC'"><span ng-bind="sku.Name"></span></td>
+                <td ng-if="sku.Type == 'MSC'"><span ng-bind="sku.Unit"></span></td>
+                <td ng-if="sku.Type == 'MSC'"><span>&#8377;</span><span ng-bind="sku.Rate"></span></td>
+                <td ng-if="sku.Type == 'MSC'"> <span class="input-group"> <span class="input-group-addon">Qty</span> <input type="number" class="form-control" ng-model="sku.Qty"> </span> </td>
+                <td ng-if="sku.Type == 'MSC'"><span ng-bind="sku.CRemarks"></span></td>
+                <td ng-if="sku.Type == 'MSC'"><button ng-click="addSKUAsMSCOrder(sku)" class="btn btn-sm btn-warning pull-right">Add</button></td>
+              </tr>
+            </table>
+          </div> <!-- sku templates panel -->
         </div><!-- well-->
       </form>
 

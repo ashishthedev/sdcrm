@@ -60,6 +60,7 @@ appMod.controller('NewPurchasersController', ['$scope', 'PURCHASERS', function($
     newItem["CaseSize"]= $scope.orphanTCDSKU.CaseSize;
     newItem["CaseType"]= $scope.orphanTCDSKU.CaseType;
     newItem["Rate"]= $scope.orphanTCDSKU.Rate;
+    newItem["CRemarks"]= $scope.orphanTCDSKU.CRemarks;
     items.splice(items.length, 0, angular.copy(newItem));
     $scope.orphanTCDSKU.PelletSize = "";
     $scope.orphanTCDSKU.BoreSize = "";
@@ -75,10 +76,12 @@ appMod.controller('NewPurchasersController', ['$scope', 'PURCHASERS', function($
       newItem["Name"]= $scope.orphanMSCSKU.Name;
       newItem["Unit"]= $scope.orphanMSCSKU.Unit;
       newItem["Rate"]= $scope.orphanMSCSKU.Rate;
+      newItem["CRemarks"]= $scope.orphanMSCSKU.CRemarks;
       items.splice(items.length, 0, angular.copy(newItem));
       $scope.orphanMSCSKU.Name = "";
       $scope.orphanMSCSKU.Unit = "";
       $scope.orphanMSCSKU.Rate = "";
+      $scope.orphanMSCSKU.CRemarks = "";
     }
 
     $scope.removeSKUItem = function(index) {
@@ -107,9 +110,9 @@ appMod.controller('NewPurchasersController', ['$scope', 'PURCHASERS', function($
           $scope.purchaser.CreditDays = 45;
           $scope.purchaser.CRemarks = "These will be remarks";
           $scope.purchaser.SKUs = [
-          {"Type": "TCD", "PelletSize":"10x08", "BoreSize":1.25, "CaseSize":"43x28", "CaseType": "Straight", "Rate":180},
-          {"Type": "TCD", "PelletSize":"13x10", "BoreSize":2.45, "CaseSize":"43x28", "CaseType": "Taper", "Rate":310},
-          {"Type":"MSC", "Name":"Boron Carbide 150mesh 100gm", "Unit":"Pack", "Rate": 600},
+          {"Type": "TCD", "PelletSize":"10x08", "BoreSize":"1.25", "CaseSize":"43x28", "CaseType": "Straight", "Rate":180},
+          {"Type": "TCD", "PelletSize":"13x10", "BoreSize":"2.45", "CaseSize":"43x28", "CaseType": "Taper", "Rate":310},
+          {"Type": "MSC", "Name":"Boron Carbide 150mesh 100gm", "Unit":"Pack", "Rate": 600},
           ];
 
           $scope.working = false;
