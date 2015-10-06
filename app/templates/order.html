@@ -96,33 +96,27 @@ appMod.controller('NewOrdersController', ['$scope', '$q', 'ORDERS', 'SKUS', 'PUR
           window.location = "/order/" + order.Id;
           }, function(error){
           $scope.statusNote = error.status + ": " + error.data;
-          $scope.working = false;
+          StopSpinner();
           });
     }
 
     FetchPurchasers = function(){
-      var deferred = $q.defer();
       $scope.working = true;
       var p = PURCHASERS.query().$promise;
       p.then(function(purchasers){
-          $scope.working = false;
           $scope.purchasers = purchasers;
           if (Debug()){
           $scope.selectedPurchaser = $scope.purchasers[0];
           }
-          deferred.resolve();
           }, function(error){
           var errMsg = error.status + ": " + error.data;
           $scope.statusNote = errMsg;
-          $scope.working = false;
-          deferred.reject(errMsg);
           });
-      return deferred.promise;
+      return p;
     }
 
     FetchOrder = function(orderId){
       orderId = document.URL.split("/")[4];
-      var deferred = $q.defer();
       var p = ORDERS.get({id: orderId}).$promise;
       p.then(function(order){
           $scope.order = order;
@@ -133,17 +127,16 @@ appMod.controller('NewOrdersController', ['$scope', '$q', 'ORDERS', 'SKUS', 'PUR
           }
           }
           $scope.order.Date = new Date(order.Date);
-          $scope.working = false;
-          deferred.resolve();
           }, function(error){
           var errMsg = error.status + ": " + error.data;
           $scope.statusNote = errMsg;
-          $scope.working = false;
-          deferred.reject(errMsg);
           });
-      return deferred.promise;
+      return p;
     }
 
+    StopSpinner = function(){
+      $scope.working = false;
+    }
     FetchSuppliers();
 
     init();
@@ -159,15 +152,11 @@ appMod.controller('NewOrdersController', ['$scope', '$q', 'ORDERS', 'SKUS', 'PUR
           $scope.order.SupplierName = "Standard";
           $scope.order.Date = new Date();
           $scope.order.Number = "111";
-          FetchPurchasers();
+          FetchPurchasers().then(StopSpinner);
         }
       }
       if (NewOrEdit == "EDIT"){
-        FetchPurchasers().then(FetchOrder);
-        //FetchPurchasers().then(FetchOrder);
-        //FetchOrder(orderId).then(FetchPurchasers());
-        //FetchOrder(orderId);
-        //$scope.working = false;
+        FetchPurchasers().then(FetchOrder).then(StopSpinner);
       }
     }
 
@@ -273,7 +262,7 @@ appMod.controller('NewOrdersController', ['$scope', '$q', 'ORDERS', 'SKUS', 'PUR
                 {{ if eq .Nature "NEW" }}
                 <button ng-click="punchOrder()" class="btn btn-lg btn-info btn-block">Punch Order</button>
                 {{ else if eq .Nature "EDIT" }}
-                <button ng-click="punchOrder()" class="btn btn-lg btn-info btn-block">Edit Order</button>
+                <button ng-click="punchOrder()" class="btn btn-lg btn-info btn-block">Save</button>
                 {{ end }}
               </div>
             </div>
