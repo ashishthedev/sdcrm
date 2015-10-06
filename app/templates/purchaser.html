@@ -55,6 +55,7 @@ appMod.controller('NewPurchasersController', ['$scope', 'PURCHASERS', function($
     var items = $scope.purchaser.SKUs;
     var newItem = {}
     newItem["Type"]= "TCD";
+    newItem["Unit"]= "pc";
     newItem["PelletSize"]= $scope.orphanTCDSKU.PelletSize;
     newItem["BoreSize"]= $scope.orphanTCDSKU.BoreSize;
     newItem["CaseSize"]= $scope.orphanTCDSKU.CaseSize;
