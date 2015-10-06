@@ -37,7 +37,7 @@ appMod.config(function($interpolateProvider) {
     $interpolateProvider.endSymbol('||');
     });
 
-appMod.controller('NewOrdersController', ['$scope', 'ORDERS', 'SKUS', 'PURCHASERS', function($scope, ORDERS, SKUS, PURCHASERS) {
+appMod.controller('NewOrdersController', ['$scope', '$q', 'ORDERS', 'SKUS', 'PURCHASERS', function($scope, $q, ORDERS, SKUS, PURCHASERS) {
     var NewOrEdit = {{.Nature }};
 
     function FetchSuppliers(){
@@ -101,17 +101,47 @@ appMod.controller('NewOrdersController', ['$scope', 'ORDERS', 'SKUS', 'PURCHASER
     }
 
     FetchPurchasers = function(){
+      var deferred = $q.defer();
       $scope.working = true;
-      PURCHASERS.query().$promise.then(function(purchasers){
+      var p = PURCHASERS.query().$promise;
+      p.then(function(purchasers){
           $scope.working = false;
           $scope.purchasers = purchasers;
           if (Debug()){
           $scope.selectedPurchaser = $scope.purchasers[0];
           }
+          deferred.resolve();
           }, function(error){
-          $scope.statusNote = error.status + ": " + error.data;
+          var errMsg = error.status + ": " + error.data;
+          $scope.statusNote = errMsg;
           $scope.working = false;
+          deferred.reject(errMsg);
           });
+      return deferred.promise;
+    }
+
+    FetchOrder = function(orderId){
+      orderId = document.URL.split("/")[4];
+      var deferred = $q.defer();
+      var p = ORDERS.get({id: orderId}).$promise;
+      p.then(function(order){
+          $scope.order = order;
+          for(var i=0; i<$scope.purchasers.length; i++){
+          var p = $scope.purchasers[i];
+          if(p.Id == order.PurchaserId){
+          $scope.selectedPurchaser = p;
+          }
+          }
+          $scope.order.Date = new Date(order.Date);
+          $scope.working = false;
+          deferred.resolve();
+          }, function(error){
+          var errMsg = error.status + ": " + error.data;
+          $scope.statusNote = errMsg;
+          $scope.working = false;
+          deferred.reject(errMsg);
+          });
+      return deferred.promise;
     }
 
     FetchSuppliers();
@@ -133,19 +163,13 @@ appMod.controller('NewOrdersController', ['$scope', 'ORDERS', 'SKUS', 'PURCHASER
         }
       }
       if (NewOrEdit == "EDIT"){
-        orderId = document.URL.split("/")[4];
-        ORDERS.get({id: orderId}).$promise.then(function(order){
-            $scope.order = order;
-            $scope.order.Date = new Date(order.Date);
-            $scope.working = false;
-            }, function(error){
-            $scope.statusNote = error.status + ": " + error.data;
-            $scope.working = false;
-            });
+        FetchPurchasers().then(FetchOrder);
+        //FetchPurchasers().then(FetchOrder);
+        //FetchOrder(orderId).then(FetchPurchasers());
+        //FetchOrder(orderId);
+        //$scope.working = false;
       }
     }
-    $scope.TCDType = "TCD1";
-
 
 }]);
 
@@ -282,9 +306,9 @@ appMod.controller('NewOrdersController', ['$scope', 'ORDERS', 'SKUS', 'PURCHASER
                 <td ng-if="sku.Type == 'TCD'"><span ng-bind="sku.CaseSize"></span></td>
                 <td ng-if="sku.Type == 'TCD'"><span ng-bind="sku.CaseType"></span></td>
                 <td ng-if="sku.Type == 'TCD'"><span ng-bind="sku.BoreSize"></span></td>
-                <td ng-if="sku.Type == 'TCD'"> <span class="input-group"> <span class="input-group-addon">Qty</span> <input type="number" class="form-control col-xs-8" ng-model="sku.Qty"> </span> </td>
+                <td ng-if="sku.Type == 'TCD'"><span class="input-group"><span class="input-group-addon">Qty</span><input type="number" class="form-control col-xs-8" ng-model="sku.Qty"></span></td>
                 <td ng-if="sku.Type == 'TCD'"><span>&#8377;</span><span ng-bind="sku.Rate"></span></td>
-                <td ng-if="sku.Type == 'TCD'"> <input ng-model="sku.CRemarks" type="text" class="form-control"></input> </td>
+                <td ng-if="sku.Type == 'TCD'"><input ng-model="sku.CRemarks" type="text" class="form-control"></input></td>
               </tr>
             </table>
           </div> <!-- sku templates panel -->
@@ -316,7 +340,7 @@ appMod.controller('NewOrdersController', ['$scope', 'ORDERS', 'SKUS', 'PURCHASER
         </div><!-- well-->
 
         <div class="row">
-          <button ng-click="addFilledUpSKUSAsOrder()" class="btn btn-warning center-block">Add Order</button>
+          <button ng-click="addFilledUpSKUSAsOrder()" class="btn btn-warning center-block">Update Order</button>
         </div>
 
       </form>

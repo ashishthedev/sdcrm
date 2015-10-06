@@ -25,7 +25,7 @@ type SKU struct {
 }
 
 type Item struct {
-	SKU SKU
+	SKU
 	Qty int64 `json:"Qty"`
 }
 
