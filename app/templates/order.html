@@ -73,6 +73,7 @@ appMod.controller('NewOrdersController', ['$scope', '$q', 'ORDERS', 'SKUS', 'PUR
 
     $scope.PurchaserChange = function() {
       $scope.order.PurchaserId = $scope.selectedPurchaser.Id;
+      $scope.order.PurchaserName = $scope.selectedPurchaser.Name;
     }
 
     $scope.addFilledUpSKUSAsOrder = function(){

@@ -39,11 +39,15 @@ appMod.controller('AllOrdersController', ['$scope', 'ORDERS', function($scope, O
 
     $scope.working = true;
     ORDERS.query().$promise.then(function(orders){
-    $scope.working = false;
+      for(var i=0; i< orders.length; i++){
+      var o = orders[i];
+      o.dd_mmm_yyyy = DDMMMYYFromUnixTime(JSDateToUnixTime(new Date(o.Date)));
+      }
+      $scope.working = false;
       $scope.orders = orders;
       }, function(error){
       $scope.statusNote = error.status + ": " + error.data;
-    $scope.working = false;
+      $scope.working = false;
       });
     }
     init()
@@ -66,7 +70,7 @@ appMod.controller('AllOrdersController', ['$scope', 'ORDERS', function($scope, O
   <div class="container">
     <div ng-repeat="o in orders">
       <div class="row">
-        <a href="/order/||o.Id||"><span ng-bind="o.Id"></span></a>
+        <a href="/order/||o.Id||"><span class="col-xs-5" ng-bind="o.PurchaserName"></span><span class="col-xs-3" ng-bind="o.Number"></span><span class="col-xs-4" ng-bind="o.dd_mmm_yyyy"></span></a>
       </div>
     </div>
   </div> <!-- container -->
