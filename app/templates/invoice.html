@@ -266,7 +266,7 @@ appMod.controller('NewInvoiceController', ['$scope', '$q', 'INVOICES', 'PENDINGO
         <div class="well">
           <h2 class="text-center"> Pending Items</h2>
           <div class="panel panel-success"> <!-- locked invoice panel -->
-            <table class="table table-striped table-condensed panel-body">
+            <table class="table table-striped table-condensed panel-body" ng-repeat="pendingOrder in pendingOrders">
               <thead>
                 <tr>
                   <th>Pellet</th>
@@ -291,22 +291,20 @@ appMod.controller('NewInvoiceController', ['$scope', '$q', 'INVOICES', 'PENDINGO
                   <td> </td>
                 </tr>
               </tfoot>
-              <div ng-repeat="pendingOrder in pendingOrders">
-                <tr ng-repeat="oItem in pendingOrder.PendingItems">
-                  <td><span ng-bind="oItem.PelletSize"></span></td>
-                  <td><span ng-bind="oItem.CaseSize"></span></td>
-                  <td><span ng-bind="oItem.CaseType"></span></td>
-                  <td ng-if="oItem.Type=='TCD'"><strong><span ng-bind="oItem.BoreSize"></span></strong></td>
-                  <td ng-if="oItem.Type=='MSC'"><strong><span ng-bind="oItem.Name"></span></strong></td>
-                  <td><span ng-bind="oItem.Qty"></span></td>
-                  <td><span>&#8377;</span><span ng-bind="oItem.Rate"></span></td>
-                  <td><span ng-bind="oItem.Unit"></span></td>
-                  <td><span ng-bind="oItem.CRemarks" class="red"></span></td>
-                </tr>
-              </div>
-            </table>
-          </div> <!-- locked invoice panel -->
-        </div>
+              <tr ng-repeat="oItem in pendingOrder.PendingItems">
+                <td><span ng-bind="oItem.PelletSize"></span></td>
+                <td><span ng-bind="oItem.CaseSize"></span></td>
+                <td><span ng-bind="oItem.CaseType"></span></td>
+                <td ng-if="oItem.Type=='TCD'"><strong><span ng-bind="oItem.BoreSize"></span></strong></td>
+                <td ng-if="oItem.Type=='MSC'"><strong><span ng-bind="oItem.Name"></span></strong></td>
+                <td><span ng-bind="oItem.Qty"></span></td>
+                <td><span>&#8377;</span><span ng-bind="oItem.Rate"></span></td>
+                <td><span ng-bind="oItem.Unit"></span></td>
+                <td><span ng-bind="oItem.CRemarks" class="red"></span></td>
+              </tr>
+            </div>
+          </table>
+        </div> <!-- locked invoice panel -->
 
         <hr>
 
