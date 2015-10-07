@@ -52,11 +52,7 @@ func orderHandler(c appengine.Context, w http.ResponseWriter, r *http.Request) (
 	} else {
 		switch r.Method {
 		case "POST":
-			order, err := decodeOrder(r.Body)
-			if err != nil {
-				return nil, err
-			}
-			return order.save(c)
+			return createNewOrder(c, r)
 		case "GET":
 			return getAllOrders(c)
 		default:
@@ -144,4 +140,16 @@ func allOrdersPageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	return
+}
+
+func createNewOrder(c appengine.Context, r *http.Request) (*Order, error) {
+	order, err := decodeOrder(r.Body)
+	if err != nil {
+		return nil, err
+	}
+	for _, oi := range order.OrderedItems {
+		order.PendingItems = append(order.PendingItems, oi)
+	}
+	order.Pending = true
+	return order.save(c)
 }

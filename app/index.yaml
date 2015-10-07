@@ -20,6 +20,12 @@ indexes:
   properties:
   - name: Created
 
+- kind: Order
+  ancestor: yes
+  properties:
+  - name: Pending
+  - name: Created
+
 - kind: Purchaser
   ancestor: yes
   properties:

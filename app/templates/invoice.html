@@ -91,8 +91,8 @@ appMod.controller('NewInvoicesController', ['$scope', 'INVOICES', function($scop
       var items = $scope.invoice.Items;
       var o = $scope.orphan.Misc;
       var newItem = {};
-      newItem.Type = "Misc"
-        newItem.Unit = o.Unit;
+      newItem.Type = "Misc";
+      newItem.Unit = o.Unit;
       newItem.Name = o.Name;
       newItem.CRemarks = o.CRemarks;
       newItem.Qty = o.Qty;

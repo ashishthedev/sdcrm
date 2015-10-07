@@ -12,6 +12,11 @@ services.factory('ORDERS', ['$resource', function($resource){
     });
   }]);
 
+services.factory('PENDINGORDERS', ['$resource', function($resource){
+    return $resource('/api/pendingorders/purchasers/:id',{},{
+    });
+  }]);
+
 services.factory('INVOICES', ['$resource', function($resource){
     return $resource('/api/invoices/:id',{},{
     });
