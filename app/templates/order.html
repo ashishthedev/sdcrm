@@ -56,17 +56,17 @@ appMod.controller('NewOrdersController', ['$scope', '$q', 'ORDERS', 'SKUS', 'PUR
 
     $scope.updateTotalQty = function() {
     var t = 0;
-    var items = $scope.order.Items;
-    for(i=0; i < items.length; i++) {
-      var item = items[i];
-      t += parseInt(item.Qty);
+    var oItems = $scope.order.OrderedItems;
+    for(i=0; i < oItems.length; i++) {
+      var oItem = oItems[i];
+      t += parseInt(oItem.Qty);
     }
     $scope.order.TotalQty = t;
     }
 
 
     $scope.removeOrderEntry = function(index){
-      $scope.order.Items.splice(index, 1);
+      $scope.order.OrderedItems.splice(index, 1);
       $scope.updateTotalQty();
     }
 
@@ -77,14 +77,14 @@ appMod.controller('NewOrdersController', ['$scope', '$q', 'ORDERS', 'SKUS', 'PUR
     }
 
     $scope.addFilledUpSKUSAsOrder = function(){
-      var items = $scope.order.Items;
-      items.splice(0, items.length); //Make it empty
+      var oItems = $scope.order.OrderedItems;
+      oItems.splice(0, oItems.length); //Make it empty
       var skus = $scope.selectedPurchaser.SKUs;
       for(var i=0; i<skus.length; i++)
       {
         var sku = skus[i];
         if(!isNaN(parseInt(sku.Qty))){
-          items.splice(items.length, 0, angular.copy(sku));
+          oItems.splice(oItems.length, 0, angular.copy(sku));
         }
       }
       $scope.updateTotalQty();
@@ -142,7 +142,7 @@ appMod.controller('NewOrdersController', ['$scope', '$q', 'ORDERS', 'SKUS', 'PUR
     function init(){
       $scope.working = true;
       $scope.order = {};
-      $scope.order.Items = [];
+      $scope.order.OrderedItems = [];
 
       if(NewOrEdit == "NEW"){
         $scope.order.Date = new Date();
@@ -214,7 +214,7 @@ appMod.controller('NewOrdersController', ['$scope', '$q', 'ORDERS', 'SKUS', 'PUR
 
     <div ng-show="order.SupplierName && selectedPurchaser && order.Number && order.Date">
       <div><!-- showorder -->
-        <div ng-show="(order.Items.length > 0)"> <!-- ngshow order -->
+        <div ng-show="(order.OrderedItems.length > 0)"> <!-- ngshow order -->
 
           <div class="well">
             <div class="panel panel-success"> <!-- locked order panel -->
@@ -245,16 +245,16 @@ appMod.controller('NewOrdersController', ['$scope', '$q', 'ORDERS', 'SKUS', 'PUR
                     <td> </td>
                   </tr>
                 </tfoot>
-                <tr ng-repeat="item in order.Items">
-                  <td><span ng-bind="item.PelletSize"></span></td>
-                  <td><span ng-bind="item.CaseSize"></span></td>
-                  <td><span ng-bind="item.CaseType"></span></td>
-                  <td ng-if="item.Type=='TCD'"><strong><span ng-bind="item.BoreSize"></span></strong></td>
-                  <td ng-if="item.Type=='MSC'"><strong><span ng-bind="item.Name"></span></strong></td>
-                  <td><span ng-bind="item.Qty"></span></td>
-                  <td><span>&#8377;</span><span ng-bind="item.Rate"></span></td>
-                  <td><span ng-bind="item.Unit"></span></td>
-                  <td><span ng-bind="item.CRemarks" class="red"></span></td>
+                <tr ng-repeat="oItem in order.OrderedItems">
+                  <td><span ng-bind="oItem.PelletSize"></span></td>
+                  <td><span ng-bind="oItem.CaseSize"></span></td>
+                  <td><span ng-bind="oItem.CaseType"></span></td>
+                  <td ng-if="oItem.Type=='TCD'"><strong><span ng-bind="oItem.BoreSize"></span></strong></td>
+                  <td ng-if="oItem.Type=='MSC'"><strong><span ng-bind="oItem.Name"></span></strong></td>
+                  <td><span ng-bind="oItem.Qty"></span></td>
+                  <td><span>&#8377;</span><span ng-bind="oItem.Rate"></span></td>
+                  <td><span ng-bind="oItem.Unit"></span></td>
+                  <td><span ng-bind="oItem.CRemarks" class="red"></span></td>
                   <td><button ng-click="removeOrderEntry($index)" class="btn btn-sm btn-danger pull-right">X</button></td>
                 </tr>
 

@@ -54,14 +54,17 @@ type Purchaser struct {
 }
 
 type Order struct {
-	Id           OrderId     `json:"Id" datastore:"-"`
-	Items        []Item      `json:"Items"`
-	Created      time.Time   `json:"Created"`
-	Date         time.Time   `json:"Date"`
-	TotalQty     int64       `json:"TotalQty"`
-	PurchaserId  PurchaserId `json:"PurchaserId"`
-	SupplierName string      `json:"SupplierName"`
-	Number       string      `json:"Number"`
-	Pending      bool        `json:"Pending"`
-	InvoicesId   []InvoiceId `json:"InvoicesId"`
+	Id              OrderId     `json:"Id" datastore:"-"`
+	Created         time.Time   `json:"Created"`
+	Date            time.Time   `json:"Date"`
+	TotalQty        int64       `json:"TotalQty"`
+	PurchaserId     PurchaserId `json:"PurchaserId"`
+	SupplierName    string      `json:"SupplierName"`
+	Number          string      `json:"Number"`
+	Pending         bool        `json:"Pending"`
+	InvoicesId      []InvoiceId `json:"InvoicesId"`
+	OrderedItems    []Item      `json:"OrderedItems"`
+	PendingItems    []Item      `json:"PendingItems"`
+	DispatchedItems []Item      `json:"DispatchedItems"`
+	PuntedItems     []Item      `json:"PuntedItems"`
 }
