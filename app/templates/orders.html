@@ -33,26 +33,61 @@ appMod.config(function($interpolateProvider) {
     $interpolateProvider.startSymbol('||');
     $interpolateProvider.endSymbol('||');
     });
-appMod.controller('AllOrdersController', ['$scope', 'ORDERS', function($scope, ORDERS) {
+appMod.controller('AllOrdersController', ['$scope', 'PURCHASERS', 'ORDERS', function($scope, PURCHASERS, ORDERS) {
 
-    function init(){
 
-    $scope.working = true;
-    ORDERS.query().$promise.then(function(orders){
+    FetchOrders = function(){
+    var p = ORDERS.query().$promise;
+    p.then(function(orders){
       for(var i=0; i< orders.length; i++){
       var o = orders[i];
       o.dd_mmm_yyyy = DDMMMYYFromUnixTime(JSDateToUnixTime(new Date(o.Date)));
       }
-      $scope.working = false;
       $scope.orders = orders;
       }, function(error){
       $scope.statusNote = error.status + ": " + error.data;
-      $scope.working = false;
       });
+    return p;
     }
-    init()
 
-    }]);
+    FetchPurchasers = function(){
+    StartSpinner();
+    var p = PURCHASERS.query().$promise;
+    p.then(function(purchasers){
+      $scope.purchasers = purchasers;
+      }, function(error){
+      var errMsg = error.status + ": " + error.data;
+      $scope.statusNote = errMsg;
+      });
+    return p;
+    }
+
+    StopSpinner = function(){
+      $scope.working = false;
+    }
+    StartSpinner = function(){
+      $scope.working = true;
+    }
+    AssignPurchaserNamesToOrders = function(){
+      for(var i=0; i<$scope.orders.length; i++){
+        var o = $scope.orders[i];
+        for(var j=0; j<$scope.purchasers.length; j++){
+          var p = $scope.purchasers[j];
+          if(o.PurchaserId == p.Id){
+            o.PurchaserName = p.Name;
+            break;
+          }
+        }
+      }
+    }
+
+    function init(){
+      StartSpinner();
+      FetchPurchasers().then(FetchOrders).then(AssignPurchaserNamesToOrders).then(StopSpinner);
+    }
+    init();
+
+}]);
 
 </script>
 </head>

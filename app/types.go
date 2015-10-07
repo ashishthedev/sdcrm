@@ -52,3 +52,16 @@ type Purchaser struct {
 	CreditDays      int64       `json:"CreditDays"`
 	CRemarks        string      `json:"CRemarks"`
 }
+
+type Order struct {
+	Id           OrderId     `json:"Id" datastore:"-"`
+	Items        []Item      `json:"Items"`
+	Created      time.Time   `json:"Created"`
+	Date         time.Time   `json:"Date"`
+	TotalQty     int64       `json:"TotalQty"`
+	PurchaserId  PurchaserId `json:"PurchaserId"`
+	SupplierName string      `json:"SupplierName"`
+	Number       string      `json:"Number"`
+	Pending      bool        `json:"Pending"`
+	InvoicesId   []InvoiceId `json:"InvoicesId"`
+}

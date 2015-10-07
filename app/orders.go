@@ -25,20 +25,6 @@ const ORDERS_API = "/api/orders/"
 
 type OrderId int64
 
-type Order struct {
-	Id            OrderId     `json:"Id" datastore:"-"`
-	Items         []Item      `json:"Items"`
-	Created       time.Time   `json:"Created"`
-	Date          time.Time   `json:"Date"`
-	TotalQty      int64       `json:"TotalQty"`
-	PurchaserId   PurchaserId `json:"PurchaserId"`
-	PurchaserName string      `json:"PurchaserName"`
-	SupplierName  string      `json:"SupplierName"`
-	Number        string      `json:"Number"`
-	Pending       bool        `json:"Pending"`
-	InvoicesId    []InvoiceId `json:"InvoicesId"`
-}
-
 func init() {
 	http.Handle(ORDERS_API, gaeHandler(orderHandler))
 	http.HandleFunc("/order/new/", newOrderPageHandler)

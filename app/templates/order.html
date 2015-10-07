@@ -106,9 +106,6 @@ appMod.controller('NewOrdersController', ['$scope', '$q', 'ORDERS', 'SKUS', 'PUR
       var p = PURCHASERS.query().$promise;
       p.then(function(purchasers){
           $scope.purchasers = purchasers;
-          if (Debug()){
-          $scope.selectedPurchaser = $scope.purchasers[0];
-          }
           }, function(error){
           var errMsg = error.status + ": " + error.data;
           $scope.statusNote = errMsg;
@@ -153,7 +150,12 @@ appMod.controller('NewOrdersController', ['$scope', '$q', 'ORDERS', 'SKUS', 'PUR
           $scope.order.SupplierName = "Standard";
           $scope.order.Date = new Date();
           $scope.order.Number = "111";
-          FetchPurchasers().then(StopSpinner);
+          FetchPurchasers().then(StopSpinner).then(function(){
+              if (Debug()){
+              $scope.selectedPurchaser = $scope.purchasers[0];
+              $scope.PurchaserChange();
+              }
+              });
         }
       }
       if (NewOrEdit == "EDIT"){
