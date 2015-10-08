@@ -131,14 +131,15 @@ appMod.controller('NewInvoiceController', ['$scope', '$q', 'INVOICES', 'PENDINGO
     }
 
     FetchInvoice = function(){
+
       invoiceId = document.URL.split("/")[4];
       var p = INVOICES.get({id: invoiceId}).$promise;
       p.then(function(invoice){
           $scope.invoice = invoice;
           for(var i=0; i<$scope.purchasers.length; i++){
-          var p = $scope.purchasers[i];
-          if(p.Id == invoice.PurchaserId){
-          $scope.selectedPurchaser = p;
+          var pur = $scope.purchasers[i];
+          if(pur.Id == invoice.PurchaserId){
+          $scope.selectedPurchaser = pur;
           }
           }
           $scope.invoice.Date = new Date(invoice.Date);
