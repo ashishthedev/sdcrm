@@ -223,41 +223,41 @@ appMod.controller('NewInvoiceController', ['$scope', '$q', 'INVOICES', 'PENDINGO
   <div id="statusNote" ng-bind="statusNote"></div>
   <div id="statusNote" > Deleting an invoice should change related orders also and change pending items back to normal.</div>
 </div>
-<div ng-show="working"> <!-- show=working -->
-  <img class="center-block" src="/static/img/working.gif" />
-</div> <!-- show=working -->
-
-<div ng-show="!working"> <!-- show=!working -->
-  <div class="container">
-    <div class="row"><!-- PO Global Details Row -->
-      <div class="col-xs-6">
-        <select ng-model="invoice.SupplierName" class="form-control" ng-options="k as k for k in availableSuppliers">
-          <option value='' disabled selected style='display:none;'></option>
-        </select>
-      </div>
-      <div class="col-xs-6">
-        <div class="row">
-          <div class="col-xs-12 col-sm-8">
-            <select ng-model="selectedPurchaser" class="form-control" ng-options="k as k.Name for k in purchasers" ng-change="PurchaserChange()">
-              <option value='' disabled selected style='display:none;'></option>
-            </select>
-          </div>
-          <div class="col-xs-12 col-sm-4">
-            <button class="form-control btn btn-link">+ (TODO)</button>
-          </div>
+<div class="container">
+  <div class="row"><!-- PO Global Details Row -->
+    <div class="col-xs-6">
+      <select ng-model="invoice.SupplierName" class="form-control" ng-options="k as k for k in availableSuppliers">
+        <option value='' disabled selected style='display:none;'></option>
+      </select>
+    </div>
+    <div class="col-xs-6">
+      <div class="row">
+        <div class="col-xs-12 col-sm-8">
+          <select ng-model="selectedPurchaser" class="form-control" ng-options="k as k.Name for k in purchasers" ng-change="PurchaserChange()">
+            <option value='' disabled selected style='display:none;'></option>
+          </select>
+        </div>
+        <div class="col-xs-12 col-sm-4">
+          <button class="form-control btn btn-link">+ (TODO)</button>
         </div>
       </div>
-      <div class="col-xs-6">
-        <input ng-model="invoice.Number" type="text" class="form-control" placeholder="Invoice#"></input>
-      </div>
-      <div class="col-xs-6 col-sm-4">
-        <input required class="center-block" autofocus="true" title="PO Date" type="date" ng-model="invoice.Date" ng-change="DateChanged()" />
-        <div class="text-center" ng-bind="dateDiffFromTodayAsText"></div>
-      </div>
-    </div><!-- PO Global Details Row -->
+    </div>
+    <div class="col-xs-6">
+      <input ng-model="invoice.Number" type="text" class="form-control" placeholder="Invoice#"></input>
+    </div>
+    <div class="col-xs-6 col-sm-4">
+      <input required class="center-block" autofocus="true" title="PO Date" type="date" ng-model="invoice.Date" ng-change="DateChanged()" />
+      <div class="text-center" ng-bind="dateDiffFromTodayAsText"></div>
+    </div>
+  </div><!-- PO Global Details Row -->
 
-    <hr>
+  <hr>
 
+  <div ng-show="working"> <!-- show=working -->
+    <img class="center-block" src="/static/img/working.gif" />
+  </div> <!-- show=working -->
+
+  <div ng-show="!working"> <!-- show=!working -->
     <div ng-show="invoice.SupplierName && selectedPurchaser && invoice.Number && invoice.Date">
       <div ng-show="(invoice.Items.length > 0)"> <!-- ngshow invoice preview-->
 
@@ -312,7 +312,9 @@ appMod.controller('NewInvoiceController', ['$scope', '$q', 'INVOICES', 'PENDINGO
           <div class="row" ng-if="invoice.PRemarks">
             Public Remarks:<span>||invoice.PRemarks||</span>
           </div>
-
+          <div class="container">
+            <label class="checkbox"><input ng-model="invoice.DoNotMoveStock" type="checkbox">Do not move stock</label>
+          </div>
           <div class="row">
             <div class="col-xs-12 col-sm-offset-2 col-sm-8">
               {{ if eq .Nature "NEW" }}
@@ -330,8 +332,8 @@ appMod.controller('NewInvoiceController', ['$scope', '$q', 'INVOICES', 'PENDINGO
 
       <form>
         <div class="well">
-          <div class="panel panel-warning"> <!-- sku templates panel -->
-            <h5 class="text-center"> Feed Dies Order</h5>
+          <h4 class="text-center"> Input Order</h4>
+          <div class="panel panel-warning"> <!-- Input order panel -->
             <table class="table table-striped table-condensed panel-body">
               <thead>
                 <tr>
@@ -339,7 +341,8 @@ appMod.controller('NewInvoiceController', ['$scope', '$q', 'INVOICES', 'PENDINGO
                   <th>Case</th>
                   <th>Type</th>
                   <th>Bore</th>
-                  <th>Qty</th>
+                  <th>Unit</th>
+                  <th class="col-xs-6">Qty</th>
                   <th>Rate</th>
                   <th>Remarks</th>
                   <th></th>
@@ -347,40 +350,19 @@ appMod.controller('NewInvoiceController', ['$scope', '$q', 'INVOICES', 'PENDINGO
               </thead>
 
               <tr ng-repeat="item in invoice.Items">
-                <td ng-if="item.Type == 'TCD'"><span ng-bind="item.PelletSize"></span></td>
-                <td ng-if="item.Type == 'TCD'"><span ng-bind="item.CaseSize"></span></td>
-                <td ng-if="item.Type == 'TCD'"><span ng-bind="item.CaseType"></span></td>
+                <td><span ng-bind="item.PelletSize"></span></td>
+                <td><span ng-bind="item.CaseSize"></span></td>
+                <td><span ng-bind="item.CaseType"></span></td>
                 <td ng-if="item.Type == 'TCD'"><span ng-bind="item.BoreSize"></span></td>
-                <td ng-if="item.Type == 'TCD'"><span class="input-group"><span class="input-group-addon">Qty</span><input ng-init="item.Qty" type="number" class="form-control col-xs-8" ng-model="item.Qty"></span></td>
-                <td ng-if="item.Type == 'TCD'"><span>&#8377;</span><span ng-bind="item.Rate"></span></td>
-                <td ng-if="item.Type == 'TCD'"><input ng-model="item.CRemarks" type="text" class="form-control"></input></td>
+                <td ng-if="item.Type == 'MSC'"><span ng-bind="item.Name"></span></td>
+                <td><span ng-bind="item.Unit"></span></td>
+                <td><span class="input-group"><span class="input-group-addon">Qty</span><input ng-init="item.Qty" type="number" class="form-control col-xs-8" ng-model="item.Qty"></span></td>
+                <td><span>&#8377;</span><span ng-bind="item.Rate"></span></td>
+                <td><input ng-model="item.CRemarks" type="text" class="form-control"></input></td>
               </tr>
             </table>
           </div> <!-- item templates panel -->
 
-          <div class="panel panel-warning"> <!-- item misc templates panel -->
-            <h5 class="text-center"> Feed Misc Order</h5>
-            <table class="table table-striped table-condensed panel-body">
-              <thead>
-                <tr>
-                  <th>Item</th>
-                  <th>Unit</th>
-                  <th>Qty</th>
-                  <th>Rate</th>
-                  <th>Remarks</th>
-                  <th></th>
-                </tr>
-              </thead>
-
-              <tr ng-repeat="item in invoice.Items">
-                <td ng-if="item.Type == 'MSC'"><span ng-bind="item.Name"></span></td>
-                <td ng-if="item.Type == 'MSC'"><span ng-bind="item.Unit"></span></td>
-                <td ng-if="item.Type == 'MSC'"> <span class="input-group"> <span class="input-group-addon">Qty</span> <input type="number" class="form-control" ng-model="item.Qty"> </span> </td>
-                <td ng-if="item.Type == 'MSC'"><span>&#8377;</span><span ng-bind="item.Rate"></span></td>
-                <td ng-if="item.Type == 'MSC'"> <input ng-model="item.CRemarks" type="text" class="form-control"></input> </td>
-              </tr>
-            </table>
-          </div> <!-- item misc templates panel -->
           <input class="form-control" ng-model="invoice.PRemarks" placeholder="Any public remarks..."></input>
 
         </div><!-- well-->
@@ -407,18 +389,6 @@ appMod.controller('NewInvoiceController', ['$scope', '$q', 'INVOICES', 'PENDINGO
                   <th>Remarks</th>
                 </tr>
               </thead>
-              <tfoot>
-                <tr>
-                  <td>Total:</td>
-                  <td> </td>
-                  <td> </td>
-                  <td> </td>
-                  <td> <b><span ng-bind="invoice.TotalQty"></span></b> </td>
-                  <td> </td>
-                  <td> </td>
-                  <td> </td>
-                </tr>
-              </tfoot>
               <tr ng-repeat="oItem in pendingOrder.PendingItems">
                 <td><span ng-bind="oItem.PelletSize"></span></td>
                 <td><span ng-bind="oItem.CaseSize"></span></td>
@@ -440,8 +410,8 @@ appMod.controller('NewInvoiceController', ['$scope', '$q', 'INVOICES', 'PENDINGO
 
 
     </div><!-- ng-show-->
-  </div> <!-- container -->
-</div> <!-- show=!working -->
+  </div> <!-- show=!working -->
+</div> <!-- container -->
 <ul>
   <li><a href="/order/new">New Order</a></li>
 </ul>

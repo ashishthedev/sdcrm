@@ -68,3 +68,17 @@ type Order struct {
 	DispatchedItems []Item      `json:"DispatchedItems"`
 	PuntedItems     []Item      `json:"PuntedItems"`
 }
+
+type Invoice struct {
+	Id             InvoiceId `json:"Id" datastore:"-"`
+	Items          []Item    `json:"Items"`
+	Created        time.Time `json:"Created"`
+	Date           time.Time `json:"Date"`
+	TotalQty       int64     `json:"TotalQty"`
+	PurchaserName  string    `json:"PurchaserName"`
+	SupplierName   string    `json:"SupplierName"`
+	Number         string    `json:"Number"`
+	PRemarks       string    `json:"PRemarks"`
+	OrdersId       []OrderId `json:"OrdersId"`
+	DoNotMoveStock bool      `json:"DoNotMoveStock"`
+}

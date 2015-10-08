@@ -25,18 +25,6 @@ const INVOICES_API = "/api/invoices/"
 
 type InvoiceId int64
 
-type Invoice struct {
-	Id            InvoiceId `json:"Id" datastore:"-"`
-	Items         []Item    `json:"Items"`
-	Created       time.Time `json:"Created"`
-	Date          time.Time `json:"Date"`
-	TotalQty      int64     `json:"TotalQty"`
-	PurchaserName string    `json:"PurchaserName"`
-	SupplierName  string    `json:"SupplierName"`
-	Number        string    `json:"Number"`
-	OrdersId      []OrderId `json:"OrdersId"`
-}
-
 func init() {
 	http.Handle(INVOICES_API, gaeHandler(invoiceHandler))
 	http.HandleFunc("/invoice/new/", newInvoicePageHandler)
