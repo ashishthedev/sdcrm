@@ -51,14 +51,37 @@ appMod.controller('NewInvoiceController', ['$scope', '$q', 'INVOICES', 'PENDINGO
     $scope.dateDiffFromTodayAsText = GetDateDiffAsText($scope.invoice.Date);
     }
 
-    $scope.updateTotalQty = function() {
-    var t = 0;
+    $scope.InvoiceTotalQty = function(){
     var oItems = $scope.invoice.Items;
-    for(i=0; i < oItems.length; i++) {
+    var t = 0;
+    for(var i=0; i < oItems.length; i++) {
     var oItem = oItems[i];
     t += parseInt(oItem.Qty);
     }
-    $scope.invoice.TotalQty = t;
+    return t;
+
+    }
+    $scope.InvoiceGoodsValue = function(){
+      var oItems = $scope.invoice.Items;
+      var t = 0;
+      for(var i=0; i < oItems.length; i++) {
+        var oItem = oItems[i];
+        t += parseInt(oItem.Qty * oItem.Rate);
+      }
+      return t;
+    }
+
+    $scope.updateTotalQtyAndAmount = function() {
+      var oItems = $scope.invoice.Items;
+
+      $scope.invoice.TotalQty=0;
+      $scope.invoice.TotalAmount=0;
+      for(var i=0; i < oItems.length; i++) {
+        var oItem = oItems[i];
+        $scope.invoice.TotalQty += parseInt(oItem.Qty);
+        $scope.invoice.TotalAmount += parseInt(oItem.Qty * oItem.Rate);
+      }
+
     }
 
     $scope.PurchaserChange = function() {
@@ -225,7 +248,7 @@ appMod.controller('NewInvoiceController', ['$scope', '$q', 'INVOICES', 'PENDINGO
         </div>
       </div>
       <div class="col-xs-6">
-        <input ng-model="invoice.Number" type="text" class="form-control" placeholder="PO#"></input>
+        <input ng-model="invoice.Number" type="text" class="form-control" placeholder="Invoice#"></input>
       </div>
       <div class="col-xs-6 col-sm-4">
         <input required class="center-block" autofocus="true" title="PO Date" type="date" ng-model="invoice.Date" ng-change="DateChanged()" />
@@ -250,9 +273,9 @@ appMod.controller('NewInvoiceController', ['$scope', '$q', 'INVOICES', 'PENDINGO
                   <th>Bore/Item</th>
                   <th>Qty</th>
                   <th>Rate</th>
+                  <th>Amount</th>
                   <th>Unit</th>
                   <th>Remarks</th>
-                  <th></th>
                 </tr>
               </thead>
               <tfoot>
@@ -261,28 +284,34 @@ appMod.controller('NewInvoiceController', ['$scope', '$q', 'INVOICES', 'PENDINGO
                   <td> </td>
                   <td> </td>
                   <td> </td>
-                  <td> <b><span ng-bind="invoice.TotalQty"></span></b> </td>
+                  <td> <b><span>||InvoiceTotalQty()||</span></b> </td>
                   <td> </td>
+                  <td> <b><span>&#8377;</span><span>||InvoiceGoodsValue()||</span></b> </td>
                   <td> </td>
                   <td> </td>
                   <td> </td>
                 </tr>
               </tfoot>
-              <tr ng-repeat="oItem in invoice.Items">
+              <tr ng-repeat="oItem in invoice.Items" ng-if="oItem.Qty > 0">
                 <td><span ng-bind="oItem.PelletSize"></span></td>
                 <td><span ng-bind="oItem.CaseSize"></span></td>
                 <td><span ng-bind="oItem.CaseType"></span></td>
                 <td ng-if="oItem.Type=='TCD'"><strong><span ng-bind="oItem.BoreSize"></span></strong></td>
                 <td ng-if="oItem.Type=='MSC'"><strong><span ng-bind="oItem.Name"></span></strong></td>
                 <td><span ng-bind="oItem.Qty"></span></td>
+
                 <td><span>&#8377;</span><span ng-bind="oItem.Rate"></span></td>
+                <td><span>&#8377;</span><span>||oItem.Qty*oItem.Rate||</span></td>
                 <td><span ng-bind="oItem.Unit"></span></td>
                 <td><span ng-bind="oItem.CRemarks" class="red"></span></td>
-                <td><button ng-click="removeOrderEntry($index)" class="btn btn-sm btn-danger pull-right">X</button></td>
               </tr>
 
             </table>
           </div> <!-- invoice preview panel -->
+
+          <div class="row" ng-if="invoice.PRemarks">
+            Public Remarks:<span>||invoice.PRemarks||</span>
+          </div>
 
           <div class="row">
             <div class="col-xs-12 col-sm-offset-2 col-sm-8">
@@ -352,6 +381,7 @@ appMod.controller('NewInvoiceController', ['$scope', '$q', 'INVOICES', 'PENDINGO
               </tr>
             </table>
           </div> <!-- item misc templates panel -->
+          <input class="form-control" ng-model="invoice.PRemarks" placeholder="Any public remarks..."></input>
 
         </div><!-- well-->
       </form>
