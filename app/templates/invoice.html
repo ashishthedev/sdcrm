@@ -87,6 +87,7 @@ appMod.controller('NewInvoiceController', ['$scope', '$q', 'INVOICES', 'PENDINGO
     $scope.PurchaserChange = function() {
       $scope.invoice.PurchaserId = $scope.selectedPurchaser.Id;
       FetchPendingOrders().then(ClubPendingOrdersAndInitializeInvoice).then(StopSpinner);
+      $scope.invoice.TaxPercentage = $scope.selectedPurchaser.DefaultTaxPercentage;
     }
 
     $scope.punchInvoice = function() {
@@ -140,6 +141,7 @@ appMod.controller('NewInvoiceController', ['$scope', '$q', 'INVOICES', 'PENDINGO
           var pur = $scope.purchasers[i];
           if(pur.Id == invoice.PurchaserId){
           $scope.selectedPurchaser = pur;
+          $scope.invoice.TaxPercentage = $scope.selectedPurchaser.DefaultTaxPercentage;
           }
           }
           $scope.invoice.Date = new Date(invoice.Date);
@@ -233,14 +235,9 @@ appMod.controller('NewInvoiceController', ['$scope', '$q', 'INVOICES', 'PENDINGO
     </div>
     <div class="col-xs-6">
       <div class="row">
-        <div class="col-xs-12 col-sm-8">
-          <select ng-model="selectedPurchaser" class="form-control" ng-options="k as k.Name for k in purchasers" ng-change="PurchaserChange()">
-            <option value='' disabled selected style='display:none;'></option>
-          </select>
-        </div>
-        <div class="col-xs-12 col-sm-4">
-          <button class="form-control btn btn-link">+ (TODO)</button>
-        </div>
+        <select ng-model="selectedPurchaser" class="form-control" ng-options="k as k.Name for k in purchasers" ng-change="PurchaserChange()">
+          <option value='' disabled selected style='display:none;'></option>
+        </select>
       </div>
     </div>
     <div class="col-xs-6">
@@ -310,11 +307,76 @@ appMod.controller('NewInvoiceController', ['$scope', '$q', 'INVOICES', 'PENDINGO
             </table>
           </div> <!-- invoice preview panel -->
 
+          <div class="row">
+
+            <div class="form-group">
+              <label for="Discount" class="col-xs-2 control-label">Discount</label>
+              <div class="col-xs-10">
+                <span class="input-group"><span class="input-group-addon">- &#8377;</span>
+                  <input ng-model="invoice.Discount" type="number" class="form-control" id="Discount" placeholder="Discount if any...">
+                </span>
+              </div>
+            </div>
+
+
+          </div>
+          <div class="row">
+            <div class="form-group">
+              <label for="GoodsValue" class="col-xs-2 control-label">Goods Value</label>
+              <div class="col-xs-10">
+                <span class="input-group"><span class="input-group-addon">&#8377;</span>
+                  <input ng-model="invoice.GoodsValue" type="number" class="form-control" id="GoodsValue" disabled="">
+                </span>
+              </div>
+            </div>
+
+          </div>
+          <div class="row">
+            <div class="form-group">
+              <label for="TaxPercentage" class="col-xs-2 control-label">Tax</label>
+              <div class="col-xs-5">
+                <span class="input-group"><span class="input-group-addon">%</span>
+                  <input ng-model="invoice.TaxPercentage" type="number" class="form-control" id="TaxPercentage" placeholder="Tax % ...">
+                </span>
+              </div>
+              <div class="col-xs-5">
+                <span class="input-group"><span class="input-group-addon">&#8377;</span>
+                  <input ng-model="invoice.TaxAmount" type="number" class="form-control" id="Tax" placeholder="Tax ..." disabled="">
+                </span>
+              </div>
+            </div>
+
+          </div>
+          <div class="row">
+            <div class="form-group">
+              <label for="Courier" class="col-xs-2 control-label">Courier</label>
+              <div class="col-xs-10">
+                <span class="input-group"><span class="input-group-addon">&#8377;</span>
+                  <input ng-model="invoice.Courier" type="number" class="form-control" id="Courier" placeholder="Courier ...">
+                </span>
+              </div>
+            </div>
+
+          </div>
+          <div class="row">
+            <div class="form-group">
+              <label for="InvoiceAmount" class="col-xs-2 control-label">Invoice Amount</label>
+              <div class="col-xs-10">
+                <span class="input-group"><span class="input-group-addon">&#8377;</span>
+                  <input ng-model="invoice.InvoiceAmount" type="number" class="form-control" id="InvoiceAmount" placeholder="Invoice Amount ..." disabled="">
+                </span>
+              </div>
+            </div>
+
+          </div>
           <div class="row" ng-if="invoice.PRemarks">
             Public Remarks:<span>||invoice.PRemarks||</span>
           </div>
           <div class="container">
-            <label class="checkbox"><input ng-model="invoice.DoNotMoveStock" type="checkbox">Do not move stock</label>
+            <label class="checkbox">
+              <input ng-model="invoice.DoNotMoveStock" type="checkbox">
+              Do not move stock
+            </label>
           </div>
           <div class="row">
             <div class="col-xs-12 col-sm-offset-2 col-sm-8">

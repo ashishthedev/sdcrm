@@ -39,18 +39,19 @@ type Address struct {
 
 type Purchaser struct {
 	Address
-	Id              PurchaserId `json:"Id" datastore:"-"`
-	SKUs            []SKU       `json:"SKUs"`
-	Created         time.Time   `json:"Created"`
-	Name            string      `json:"Name"`
-	DispatchEmails  CSL         `json:"DispatchEmails"`
-	FORMCEmails     CSL         `json:"FORMCEmails"`
-	TinNumber       string      `json:"TinNumber"`
-	BillingAddress  string      `json:"BillingAddress"`
-	SMSPhoneNumbers CSL         `json:"SMSPhoneNumbers"`
-	MDPhoneNumbers  CSL         `json:"MDPhoneNumbers"`
-	CreditDays      int64       `json:"CreditDays"`
-	CRemarks        string      `json:"CRemarks"`
+	Id                   PurchaserId `json:"Id" datastore:"-"`
+	SKUs                 []SKU       `json:"SKUs"`
+	Created              time.Time   `json:"Created"`
+	Name                 string      `json:"Name"`
+	DispatchEmails       CSL         `json:"DispatchEmails"`
+	DefaultTaxPercentage float64     `json:"DefaultTaxPercentage"`
+	FORMCEmails          CSL         `json:"FORMCEmails"`
+	TinNumber            string      `json:"TinNumber"`
+	BillingAddress       string      `json:"BillingAddress"`
+	SMSPhoneNumbers      CSL         `json:"SMSPhoneNumbers"`
+	MDPhoneNumbers       CSL         `json:"MDPhoneNumbers"`
+	CreditDays           int64       `json:"CreditDays"`
+	CRemarks             string      `json:"CRemarks"`
 }
 
 type Order struct {

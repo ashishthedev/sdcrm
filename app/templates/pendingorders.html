@@ -20,8 +20,9 @@
 <link rel="apple-touch-icon-precomposed" href="/static/img/57.png">
 
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=yes">
-<link rel="stylesheet" href="/static/css/bootstrap.min.css" type="text/css" >
+<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
 <link rel="stylesheet" href="/static/css/bs_modified.css" type="text/css" >
+<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
 <script>
 var appMod = angular.module('crmapp', ['services']);
 appMod.config(['$resourceProvider', function($resourceProvider) {
@@ -84,6 +85,7 @@ appMod.controller('AllPendingOrdersController', ['$scope', 'PURCHASERS', 'PENDIN
     function init(){
       StartSpinner();
       FetchPurchasers().then(FetchPendingOrders).then(AssignPurchaserNamesToOrders).then(StopSpinner);
+      $scope.todayDDMMYY = DDMMMYYFromUnixTime(JSDateToUnixTime(new Date()));
     }
     init();
 
@@ -93,9 +95,10 @@ appMod.controller('AllPendingOrdersController', ['$scope', 'PURCHASERS', 'PENDIN
 </head>
 <body ng-app="crmapp" ng-controller="AllPendingOrdersController">
 <div class="well">
-  <a href="/"><img class="center-block" src="/static/img/57.png" /></a>
-  <h1 class="text-center">All Pending Orders</h1>
+  <a href="/" class="hidden-print"><img class="center-block" src="/static/img/57.png" /></a>
+  <h1 class="text-center">Pending Orders</h1>
   <div id="statusNote" ng-bind="statusNote"></div>
+  <div class="pull-right visible-print"> <small>Printed on <span ng-bind="todayDDMMYY"></span></small> </div>
 </div>
 <div ng-show="working"> <!-- show=working -->
   <img class="center-block" src="/static/img/working.gif" />
@@ -107,10 +110,11 @@ appMod.controller('AllPendingOrdersController', ['$scope', 'PURCHASERS', 'PENDIN
       <div class="panel panel-info"> <!-- pending order panel -->
         <div class="panel-heading" ng-click="showPurchaserName=!showPurchaserName">
           <div class="row">
-            PO#<span ng-bind="o.Number"></span>    dt&nbsp;<span ng-bind="o.dd_mmm_yyyy"></span>
+            PO#<span ng-bind="o.Number"></span> dt&nbsp;<span ng-bind="o.dd_mmm_yyyy"></span>
           </div>
           <div class="row" ng-show="showPurchaserName">
-            <span class="center-block" ng-bind="o.PurchaserName"></span>
+            <span class="col-xs-8 text-left" ng-bind="o.PurchaserName"></span>
+            <a class="col-xs-4 text-right" href="/order/||o.Id||"><span class="glyphicon glyphicon-edit"></span> </a>
           </div>
         </div>
         <table class="table table-striped table-condensed panel-body">
@@ -124,16 +128,6 @@ appMod.controller('AllPendingOrdersController', ['$scope', 'PURCHASERS', 'PENDIN
               <th>Remarks</th>
             </tr>
           </thead>
-          <tfoot>
-            <tr>
-              <th><a href="/order/||o.Id||">Edit</a></th>
-              <th></th>
-              <th></th>
-              <th></th>
-              <th></th>
-              <th></th>
-            </tr>
-          </tfoot>
 
           <tr ng-repeat="item in o.PendingItems">
             <td><span ng-bind="item.PelletSize"></span></td>
