@@ -147,9 +147,6 @@ func createNewOrder(c appengine.Context, r *http.Request) (*Order, error) {
 	if err != nil {
 		return nil, err
 	}
-	for _, oi := range order.OrderedItems {
-		order.PendingItems = append(order.PendingItems, oi)
-	}
 	order.Pending = true
 	return order.save(c)
 }

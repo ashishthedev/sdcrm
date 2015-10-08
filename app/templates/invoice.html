@@ -59,8 +59,8 @@ appMod.controller('NewInvoiceController', ['$scope', '$q', 'INVOICES', 'PENDINGO
     t += parseInt(oItem.Qty);
     }
     return t;
-
     }
+
     $scope.InvoiceGoodsValue = function(){
       var oItems = $scope.invoice.Items;
       var t = 0;
@@ -285,9 +285,9 @@ appMod.controller('NewInvoiceController', ['$scope', '$q', 'INVOICES', 'PENDINGO
                   <td> </td>
                   <td> </td>
                   <td> </td>
-                  <td> <b><span>||InvoiceTotalQty()||</span></b> </td>
+                  <td> <b><span ng-bind="InvoiceTotalQty()"></span></b> </td>
                   <td> </td>
-                  <td> <b><span>&#8377;</span><span>||InvoiceGoodsValue()||</span></b> </td>
+                  <td> <b><span>&#8377;</span><span ng-bind="InvoiceGoodsValue()"></span></b> </td>
                   <td> </td>
                   <td> </td>
                   <td> </td>

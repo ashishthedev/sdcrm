@@ -38,12 +38,12 @@ appMod.controller('AllPendingOrdersController', ['$scope', 'PURCHASERS', 'PENDIN
 
     FetchPendingOrders = function(){
     var p = PENDINGORDERS.query().$promise;
-    p.then(function(pendingorders){
-      for(var i=0; i< pendingorders.length; i++){
-      var o = pendingorders[i];
+    p.then(function(pendingOrders){
+      for(var i=0; i< pendingOrders.length; i++){
+      var o = pendingOrders[i];
       o.dd_mmm_yyyy = DDMMMYYFromUnixTime(JSDateToUnixTime(new Date(o.Date)));
       }
-      $scope.pendingorders = pendingorders;
+      $scope.pendingOrders = pendingOrders;
       }, function(error){
       $scope.statusNote = error.status + ": " + error.data;
       });
@@ -69,8 +69,8 @@ appMod.controller('AllPendingOrdersController', ['$scope', 'PURCHASERS', 'PENDIN
       $scope.working = true;
     }
     AssignPurchaserNamesToOrders = function(){
-      for(var i=0; i<$scope.pendingorders.length; i++){
-        var o = $scope.pendingorders[i];
+      for(var i=0; i<$scope.pendingOrders.length; i++){
+        var o = $scope.pendingOrders[i];
         for(var j=0; j<$scope.purchasers.length; j++){
           var p = $scope.purchasers[j];
           if(o.PurchaserId == p.Id){
@@ -103,10 +103,50 @@ appMod.controller('AllPendingOrdersController', ['$scope', 'PURCHASERS', 'PENDIN
 
 <div ng-show="!working"> <!-- show=!working -->
   <div class="container">
-    <div ng-repeat="o in pendingorders">
-      <div class="row">
-        <a href="/order/||o.Id||"><span class="col-xs-5" ng-bind="o.PurchaserName"></span><span class="col-xs-3" ng-bind="o.Number"></span><span class="col-xs-4" ng-bind="o.dd_mmm_yyyy"></span></a>
-      </div>
+    <div ng-repeat="o in pendingOrders">
+      <div class="panel panel-info"> <!-- pending order panel -->
+        <div class="panel-heading" ng-click="showPurchaserName=!showPurchaserName">
+          <div class="row">
+            PO#<span ng-bind="o.Number"></span>    dt&nbsp;<span ng-bind="o.dd_mmm_yyyy"></span>
+          </div>
+          <div class="row" ng-show="showPurchaserName">
+            <span class="center-block" ng-bind="o.PurchaserName"></span>
+          </div>
+        </div>
+        <table class="table table-striped table-condensed panel-body">
+          <thead>
+            <tr>
+              <th>Pellet</th>
+              <th>Case</th>
+              <th>Type</th>
+              <th>Bore</th>
+              <th>Qty</th>
+              <th>Remarks</th>
+            </tr>
+          </thead>
+          <tfoot>
+            <tr>
+              <th><a href="/order/||o.Id||">Edit</a></th>
+              <th></th>
+              <th></th>
+              <th></th>
+              <th></th>
+              <th></th>
+            </tr>
+          </tfoot>
+
+          <tr ng-repeat="item in o.PendingItems">
+            <td><span ng-bind="item.PelletSize"></span></td>
+            <td><span ng-bind="item.CaseSize"></span></td>
+            <td><span ng-bind="item.CaseType"></span></td>
+            <td ng-if="item.Type == 'TCD'"><strong><span ng-bind="item.BoreSize"></span></strong></td>
+            <td ng-if="item.Type == 'MSC'"><strong><span ng-bind="item.Name"></span></strong></td>
+            <td><span ng-bind="item.Qty"></span></td>
+            <td><span ng-bind="item.CRemarks"></span></td>
+          </tr>
+        </table>
+      </div> <!-- pending order panel -->
+
     </div>
   </div> <!-- container -->
 </div> <!-- show=!working -->
