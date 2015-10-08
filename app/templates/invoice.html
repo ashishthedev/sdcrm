@@ -94,6 +94,10 @@ appMod.controller('NewInvoiceController', ['$scope', '$q', 'INVOICES', 'PENDINGO
       StartSpinner();
       var p = PENDINGORDERS.get({id: $scope.invoice.PurchaserId}).$promise;
       p.then(function(pendingOrders){
+          for(var i=0; i< pendingOrders.length; i++){
+          var o = pendingOrders[i];
+          o.dd_mmm_yyyy = DDMMMYYFromUnixTime(JSDateToUnixTime(new Date(o.Date)));
+          }
           $scope.pendingOrders = pendingOrders;
           }, function(error){
           var errMsg = error.status + ": " + error.data;
@@ -158,6 +162,7 @@ appMod.controller('NewInvoiceController', ['$scope', '$q', 'INVOICES', 'PENDINGO
   <h1 class="text-center">Edit Invoice</h1>
   {{ end }}
   <div id="statusNote" ng-bind="statusNote"></div>
+  <div id="statusNote" > Deleting an invoice should change related orders also and change pending items back to normal.</div>
 </div>
 <div ng-show="working"> <!-- show=working -->
   <img class="center-block" src="/static/img/working.gif" />
@@ -265,8 +270,9 @@ appMod.controller('NewInvoiceController', ['$scope', '$q', 'INVOICES', 'PENDINGO
 
         <div class="well">
           <h2 class="text-center"> Pending Items</h2>
-          <div class="panel panel-success"> <!-- locked invoice panel -->
-            <table class="table table-striped table-condensed panel-body" ng-repeat="pendingOrder in pendingOrders">
+          <div class="panel panel-success" ng-repeat="pendingOrder in pendingOrders">
+            <table class="table table-striped table-condensed panel-body">
+              <div class="panel-heading">PO#||pendingOrder.Number|| dt || pendingOrder.dd_mmm_yyyy||</div>
               <thead>
                 <tr>
                   <th>Pellet</th>
@@ -314,5 +320,8 @@ appMod.controller('NewInvoiceController', ['$scope', '$q', 'INVOICES', 'PENDINGO
     </div><!-- ng-show-->
   </div> <!-- container -->
 </div> <!-- show=!working -->
+<ul>
+  <li><a href="/order/new">New Order</a></li>
+</ul>
 </body>
 </html>
