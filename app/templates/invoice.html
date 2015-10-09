@@ -87,7 +87,10 @@ appMod.controller('NewInvoiceController', ['$scope', '$q', 'INVOICES', 'PENDINGO
     $scope.PurchaserChange = function() {
       $scope.invoice.PurchaserId = $scope.selectedPurchaser.Id;
       FetchPendingOrders().then(ClubPendingOrdersAndInitializeInvoice).then(StopSpinner);
-      $scope.invoice.TaxPercentage = $scope.selectedPurchaser.DefaultTaxPercentage;
+
+      if(NewOrEdit == "NEW"){
+        $scope.invoice.TaxPercentage = $scope.selectedPurchaser.DefaultTaxPercentage;
+      }
     }
 
     $scope.punchInvoice = function() {
@@ -141,7 +144,6 @@ appMod.controller('NewInvoiceController', ['$scope', '$q', 'INVOICES', 'PENDINGO
           var pur = $scope.purchasers[i];
           if(pur.Id == invoice.PurchaserId){
           $scope.selectedPurchaser = pur;
-          $scope.invoice.TaxPercentage = $scope.selectedPurchaser.DefaultTaxPercentage;
           }
           }
           $scope.invoice.Date = new Date(invoice.Date);
@@ -192,7 +194,14 @@ appMod.controller('NewInvoiceController', ['$scope', '$q', 'INVOICES', 'PENDINGO
       }
 
       $scope.invoice.Items = invoicableItems;
-      return;
+    }
+
+    $scope.RecalculateInvoice = function(){
+      //Recalculate the invoice
+      var i = $scope.invoice;
+      i.GoodsValue = $scope.InvoiceGoodsValue();
+      i.TaxAmount = parseInt((i.TaxPercentage / 100) * (i.GoodsValue - i.DiscountAmount));
+      i.InvoiceAmount = i.GoodsValue - i.DiscountAmount + i.TaxAmount + i.CourierCharges;
     }
 
     init();
@@ -310,10 +319,10 @@ appMod.controller('NewInvoiceController', ['$scope', '$q', 'INVOICES', 'PENDINGO
           <div class="row">
 
             <div class="form-group">
-              <label for="Discount" class="col-xs-2 control-label">Discount</label>
+              <label for="DiscountAmount" class="col-xs-2 control-label">Discount Amount</label>
               <div class="col-xs-10">
                 <span class="input-group"><span class="input-group-addon">- &#8377;</span>
-                  <input ng-model="invoice.Discount" type="number" class="form-control" id="Discount" placeholder="Discount if any...">
+                  <input ng-model="invoice.DiscountAmount" type="number" class="form-control text-right" id="DiscountAmount" placeholder="DiscountAmount if any..." ng-change="RecalculateInvoice()" min="0">
                 </span>
               </div>
             </div>
@@ -325,7 +334,7 @@ appMod.controller('NewInvoiceController', ['$scope', '$q', 'INVOICES', 'PENDINGO
               <label for="GoodsValue" class="col-xs-2 control-label">Goods Value</label>
               <div class="col-xs-10">
                 <span class="input-group"><span class="input-group-addon">&#8377;</span>
-                  <input ng-model="invoice.GoodsValue" type="number" class="form-control" id="GoodsValue" disabled="">
+                  <input ng-model="invoice.GoodsValue" type="number" class="form-control text-right" id="GoodsValue" disabled="">
                 </span>
               </div>
             </div>
@@ -336,12 +345,12 @@ appMod.controller('NewInvoiceController', ['$scope', '$q', 'INVOICES', 'PENDINGO
               <label for="TaxPercentage" class="col-xs-2 control-label">Tax</label>
               <div class="col-xs-5">
                 <span class="input-group"><span class="input-group-addon">%</span>
-                  <input ng-model="invoice.TaxPercentage" type="number" class="form-control" id="TaxPercentage" placeholder="Tax % ...">
+                  <input ng-model="invoice.TaxPercentage" type="number" class="form-control text-right" id="TaxPercentage" placeholder="Tax % ..." ng-change="RecalculateInvoice()" step=".01">
                 </span>
               </div>
               <div class="col-xs-5">
                 <span class="input-group"><span class="input-group-addon">&#8377;</span>
-                  <input ng-model="invoice.TaxAmount" type="number" class="form-control" id="Tax" placeholder="Tax ..." disabled="">
+                  <input ng-model="invoice.TaxAmount" type="number" class="form-control text-right" id="Tax" placeholder="Tax ..." disabled="">
                 </span>
               </div>
             </div>
@@ -349,10 +358,10 @@ appMod.controller('NewInvoiceController', ['$scope', '$q', 'INVOICES', 'PENDINGO
           </div>
           <div class="row">
             <div class="form-group">
-              <label for="Courier" class="col-xs-2 control-label">Courier</label>
+              <label for="CourierCharges" class="col-xs-2 control-label">Courier Charges</label>
               <div class="col-xs-10">
                 <span class="input-group"><span class="input-group-addon">&#8377;</span>
-                  <input ng-model="invoice.Courier" type="number" class="form-control" id="Courier" placeholder="Courier ...">
+                  <input ng-model="invoice.CourierCharges" type="number" class="form-control text-right" id="CourierCharges" placeholder="CourierCharges ..." ng-change="RecalculateInvoice()">
                 </span>
               </div>
             </div>
@@ -363,14 +372,14 @@ appMod.controller('NewInvoiceController', ['$scope', '$q', 'INVOICES', 'PENDINGO
               <label for="InvoiceAmount" class="col-xs-2 control-label">Invoice Amount</label>
               <div class="col-xs-10">
                 <span class="input-group"><span class="input-group-addon">&#8377;</span>
-                  <input ng-model="invoice.InvoiceAmount" type="number" class="form-control" id="InvoiceAmount" placeholder="Invoice Amount ..." disabled="">
+                  <input ng-model="invoice.InvoiceAmount" type="number" class="form-control input-lg text-right" id="InvoiceAmount" placeholder="Invoice Amount ..." disabled="">
                 </span>
               </div>
             </div>
 
           </div>
           <div class="row" ng-if="invoice.PRemarks">
-            Public Remarks:<span>||invoice.PRemarks||</span>
+            Public Remarks:<span ng-bind="invoice.PRemarks"></span>
           </div>
           <div class="container">
             <label class="checkbox">
@@ -419,7 +428,7 @@ appMod.controller('NewInvoiceController', ['$scope', '$q', 'INVOICES', 'PENDINGO
                 <td ng-if="item.Type == 'TCD'"><span ng-bind="item.BoreSize"></span></td>
                 <td ng-if="item.Type == 'MSC'"><span ng-bind="item.Name"></span></td>
                 <td><span ng-bind="item.Unit"></span></td>
-                <td><span class="input-group"><span class="input-group-addon">Qty</span><input ng-init="item.Qty" type="number" class="form-control col-xs-8" ng-model="item.Qty"></span></td>
+                <td><span class="input-group"><span class="input-group-addon">Qty</span><input ng-init="item.Qty" type="number" class="form-control col-xs-8" ng-model="item.Qty" ng-change="RecalculateInvoice()" ></span></td>
                 <td><span>&#8377;</span><span ng-bind="item.Rate"></span></td>
                 <td><input ng-model="item.CRemarks" type="text" class="form-control"></input></td>
               </tr>

@@ -82,4 +82,10 @@ type Invoice struct {
 	PRemarks       string      `json:"PRemarks"`
 	OrdersId       []OrderId   `json:"OrdersId"`
 	DoNotMoveStock bool        `json:"DoNotMoveStock"`
+	GoodsValue     int64       `json:"GoodsValue"`
+	DiscountAmount int64       `json:"DiscountAmount"`
+	TaxPercentage  float64     `json:"TaxPercentage"`
+	TaxAmount      int64       `json:"TaxAmount"`
+	CourierCharges int64       `json:"CourierCharges"`
+	InvoiceAmount  int64       `json:"InvoiceAmount"`
 }
