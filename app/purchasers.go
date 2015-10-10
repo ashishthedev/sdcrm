@@ -35,7 +35,6 @@ func init() {
 
 func purchaserHandler(c appengine.Context, w http.ResponseWriter, r *http.Request) (interface{}, error) {
 	id := r.URL.Path[len(PURCHASERS_API):]
-	c.Errorf("Received purchaser id %v", id)
 	if len(id) > 0 {
 		switch r.Method {
 		case "GET":

@@ -85,11 +85,10 @@ appMod.controller('AllPendingOrdersController', ['$scope', 'PURCHASERS', 'PENDIN
       StartSpinner();
       o.PuntedItems = angular.copy(o.PendingItems);
       o.PendingItems = [];
-      o.IsPending = false;
+      o.IsComplete = true;
       ORDERS.save(o).$promise.then(function(order){
           $scope.statusNote = "Order punted with id: " + order.Id;
           o = order;
-          alert(o.IsPending);
           StopSpinner();
           }, function(error){
           $scope.statusNote = error.status + ": " + error.data;
@@ -121,7 +120,7 @@ appMod.controller('AllPendingOrdersController', ['$scope', 'PURCHASERS', 'PENDIN
 
 <div ng-show="!working"> <!-- show=!working -->
   <div class="container">
-    <div ng-repeat="o in pendingOrders" ng-if="o.IsPending">
+    <div ng-repeat="o in pendingOrders" ng-if="!o.IsComplete">
       <div class="panel panel-info"> <!-- pending order panel -->
         <div class="panel-heading" ng-click="showPurchaserName=!showPurchaserName">
           <div class="row">

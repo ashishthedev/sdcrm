@@ -108,3 +108,6 @@ The edit tooltip
   padding-right:0;
   padding-left:0;
 }
+.well-red {
+    background: rgb(22, 105, 173);
+}

@@ -20,6 +20,7 @@ services.factory('PENDINGORDERS', ['$resource', function($resource){
 
 services.factory('INVOICES', ['$resource', function($resource){
     return $resource('/api/invoices/:id',{},{
+      'getExtraItems':{method: 'POST', url: '/api/extraItemsInInvoice/', isArray:true}
     });
   }]);
 

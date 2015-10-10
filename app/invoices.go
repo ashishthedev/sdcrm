@@ -34,7 +34,7 @@ func init() {
 
 func invoiceHandler(c appengine.Context, w http.ResponseWriter, r *http.Request) (interface{}, error) {
 	id := r.URL.Path[len(INVOICES_API):]
-	c.Errorf("Received invoice id %v", id)
+	c.Infof("Received invoice id %v", id)
 	if len(id) > 0 {
 		switch r.Method {
 		case "GET":
@@ -51,11 +51,7 @@ func invoiceHandler(c appengine.Context, w http.ResponseWriter, r *http.Request)
 	} else {
 		switch r.Method {
 		case "POST":
-			invoice, err := decodeInvoice(r.Body)
-			if err != nil {
-				return nil, err
-			}
-			return invoice.save(c)
+			return invoiceSaveEntryPoint(c, r)
 		case "GET":
 			return getAllInvoices(c)
 		default:
@@ -152,4 +148,83 @@ func allInvoicePageHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	return
+}
+
+func UpdateRelatedOrdersFieldAndEditTheirPendingItemsListAndMarkOrderCompletion(c appengine.Context, invoice *Invoice) error {
+
+	return nil
+}
+
+func invoiceSaveEntryPoint(c appengine.Context, r *http.Request) (*Invoice, error) {
+	invoice, err := decodeInvoice(r.Body)
+	if err != nil {
+		return nil, err
+	}
+	if invoice.Id == 0 {
+		return ProcessBrandNewInvoice(c, invoice)
+	} else {
+		return ProcessBrandNewInvoice(c, invoice)
+		//return ProcessExistingInvoice(c, invoice)
+	}
+}
+
+func ProcessBrandNewInvoice(c appengine.Context, invoice *Invoice) (*Invoice, error) {
+	var newInvoice *Invoice
+	var err error
+	err = datastore.RunInTransaction(c, func(c appengine.Context) error {
+		if err = CreateAdHocOrderIfRequired(c, invoice); err != nil {
+			return err
+		}
+
+		if err = UpdateRelatedOrdersFieldAndEditTheirPendingItemsListAndMarkOrderCompletion(c, invoice); err != nil {
+			return err
+		}
+
+		newInvoice, err = invoice.save(c)
+		return err
+	}, nil)
+
+	if err != nil {
+		return nil, err
+	} else {
+		return newInvoice, nil
+	}
+}
+
+func ProcessExistingInvoice(c appengine.Context, invoice *Invoice) (*Invoice, error) {
+	return invoice.save(c)
+}
+
+func CreateAdHocOrderWithTheseItems(c appengine.Context, items []Item, invoice *Invoice) (*Order, error) {
+	order := new(Order)
+	order.PurchaserId = invoice.PurchaserId
+	order.SupplierName = invoice.SupplierName
+	order.Date = time.Now()
+	order.Number = "Telephonic"
+	for _, i := range items {
+		order.OrderedItems = append(order.OrderedItems, i)
+		order.PendingItems = append(order.PendingItems, i)
+	}
+	c.Infof("About to save order:%#v", order)
+	return order.save(c)
+}
+func CreateAdHocOrderIfRequired(c appengine.Context, invoice *Invoice) error {
+	// 1. Check if the invoice is being created for some extra items.
+	// 2. Create an adHoc order for extra items.
+	// 3. Recheck if invoice is being created for extra items. This time it should not be. Defensive Programming.
+	extraItems, err := FindExtraItemsInInvoice(c, invoice)
+	if err != nil {
+		return err
+	}
+	c.Infof("Extra items in invoice of %v: %#v", invoice.PurchaserId, extraItems)
+
+	if len(extraItems) > 0 {
+		o, err := CreateAdHocOrderWithTheseItems(c, extraItems, invoice)
+		if err != nil {
+			return err
+		}
+		c.Infof("created teh extra order: %#v", o)
+
+	}
+	return nil
 }

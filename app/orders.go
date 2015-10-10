@@ -35,7 +35,7 @@ func init() {
 
 func orderHandler(c appengine.Context, w http.ResponseWriter, r *http.Request) (interface{}, error) {
 	oid := r.URL.Path[len(ORDERS_API):]
-	c.Errorf("Received oid %v", oid)
+	c.Infof("Received oid %v", oid)
 	if len(oid) > 0 {
 		switch r.Method {
 		case "GET":
@@ -52,7 +52,7 @@ func orderHandler(c appengine.Context, w http.ResponseWriter, r *http.Request) (
 	} else {
 		switch r.Method {
 		case "POST":
-			return handleOrder(c, r)
+			return orderSaveEntryPoint(c, r)
 		case "GET":
 			return getAllOrders(c)
 		default:
@@ -142,16 +142,10 @@ func allOrdersPageHandler(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-func handleOrder(c appengine.Context, r *http.Request) (*Order, error) {
+func orderSaveEntryPoint(c appengine.Context, r *http.Request) (*Order, error) {
 	order, err := decodeOrder(r.Body)
 	if err != nil {
 		return nil, err
 	}
-	if order.Id == 0 {
-		//If its a new order
-		order.IsPending = true
-	}
-
-	c.Errorf("Received request to save order%#v", order)
 	return order.save(c)
 }

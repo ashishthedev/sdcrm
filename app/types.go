@@ -24,6 +24,38 @@ type SKU struct {
 	CRemarks string  `json:"CRemarks"`
 }
 
+func (a Item) equals(b Item) bool {
+	if a.PelletSize != b.PelletSize {
+		return false
+	}
+	if a.BoreSize != b.BoreSize {
+		return false
+	}
+	if a.CaseType != b.CaseType {
+		return false
+	}
+	if a.CaseSize != b.CaseSize {
+		return false
+	}
+	if a.Name != b.Name {
+		return false
+	}
+	if a.Unit != b.Unit {
+		return false
+	}
+	if a.Rate != b.Rate {
+		return false
+	}
+	if a.Type != b.Type {
+		return false
+	}
+	if a.CRemarks != b.CRemarks {
+		return false
+	}
+
+	return true
+}
+
 type Item struct {
 	SKU
 	Qty int64 `json:"Qty"`
@@ -62,7 +94,7 @@ type Order struct {
 	PurchaserId     PurchaserId `json:"PurchaserId"`
 	SupplierName    string      `json:"SupplierName"`
 	Number          string      `json:"Number"`
-	IsPending       bool        `json:"IsPending"`
+	IsComplete      bool        `json:"IsComplete"`
 	InvoicesId      []InvoiceId `json:"InvoicesId"`
 	OrderedItems    []Item      `json:"OrderedItems"`
 	PendingItems    []Item      `json:"PendingItems"`
