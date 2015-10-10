@@ -62,7 +62,7 @@ type Order struct {
 	PurchaserId     PurchaserId `json:"PurchaserId"`
 	SupplierName    string      `json:"SupplierName"`
 	Number          string      `json:"Number"`
-	Pending         bool        `json:"Pending"`
+	IsPending       bool        `json:"IsPending"`
 	InvoicesId      []InvoiceId `json:"InvoicesId"`
 	OrderedItems    []Item      `json:"OrderedItems"`
 	PendingItems    []Item      `json:"PendingItems"`

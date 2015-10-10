@@ -20,9 +20,8 @@
 <link rel="apple-touch-icon-precomposed" href="/static/img/57.png">
 
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=yes">
-<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+<link rel="stylesheet" href="/static/css/bootstrap.min.css" type="text/css" >
 <link rel="stylesheet" href="/static/css/bs_modified.css" type="text/css" >
-<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
 <script>
 var appMod = angular.module('crmapp', ['services']);
 appMod.config(['$resourceProvider', function($resourceProvider) {
@@ -34,7 +33,7 @@ appMod.config(function($interpolateProvider) {
     $interpolateProvider.startSymbol('||');
     $interpolateProvider.endSymbol('||');
     });
-appMod.controller('AllPendingOrdersController', ['$scope', 'PURCHASERS', 'PENDINGORDERS', function($scope, PURCHASERS, PENDINGORDERS) {
+appMod.controller('AllPendingOrdersController', ['$scope', 'PURCHASERS', 'PENDINGORDERS', 'ORDERS', function($scope, PURCHASERS, PENDINGORDERS, ORDERS) {
 
 
     FetchPendingOrders = function(){
@@ -82,6 +81,22 @@ appMod.controller('AllPendingOrdersController', ['$scope', 'PURCHASERS', 'PENDIN
       }
     }
 
+    $scope.puntOrder = function(o){
+      StartSpinner();
+      o.PuntedItems = angular.copy(o.PendingItems);
+      o.PendingItems = [];
+      o.IsPending = false;
+      ORDERS.save(o).$promise.then(function(order){
+          $scope.statusNote = "Order punted with id: " + order.Id;
+          o = order;
+          alert(o.IsPending);
+          StopSpinner();
+          }, function(error){
+          $scope.statusNote = error.status + ": " + error.data;
+          StopSpinner();
+          });
+    }
+
     function init(){
       StartSpinner();
       FetchPurchasers().then(FetchPendingOrders).then(AssignPurchaserNamesToOrders).then(StopSpinner);
@@ -106,15 +121,16 @@ appMod.controller('AllPendingOrdersController', ['$scope', 'PURCHASERS', 'PENDIN
 
 <div ng-show="!working"> <!-- show=!working -->
   <div class="container">
-    <div ng-repeat="o in pendingOrders">
+    <div ng-repeat="o in pendingOrders" ng-if="o.IsPending">
       <div class="panel panel-info"> <!-- pending order panel -->
         <div class="panel-heading" ng-click="showPurchaserName=!showPurchaserName">
           <div class="row">
-            PO#<span ng-bind="o.Number"></span> dt&nbsp;<span ng-bind="o.dd_mmm_yyyy"></span>
+            <span class="pull-left">PO#<span ng-bind="o.Number"></span> dt&nbsp;<span ng-bind="o.dd_mmm_yyyy"></span></span>
+            <span ng-if="showPurchaserName" class="text-right pull-right" ng-bind="o.PurchaserName"></span>
           </div>
           <div class="row" ng-show="showPurchaserName">
-            <span class="col-xs-8 text-left" ng-bind="o.PurchaserName"></span>
-            <a class="col-xs-4 text-right" href="/order/||o.Id||"><span class="glyphicon glyphicon-edit"></span> </a>
+            <span class="pull-left"><span class="text-left"><button class="btn btn-danger" ng-click="puntOrder(o)">Punt</button></span></span>
+            <span class="pull-right"><span class="text-right"><a class="btn btn-info " href="/order/||o.Id||">Edit</a></span></span>
           </div>
         </div>
         <table class="table table-striped table-condensed panel-body">

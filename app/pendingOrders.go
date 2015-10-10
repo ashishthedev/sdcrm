@@ -55,7 +55,7 @@ func pendingOrdersHandler(c appengine.Context, w http.ResponseWriter, r *http.Re
 
 func getAllPendingOrders(c appengine.Context) ([]Order, error) {
 	pendingorders := []Order{}
-	ks, err := datastore.NewQuery("Order").Ancestor(defaultOrderList(c)).Order("Created").Filter("Pending=", true).GetAll(c, &pendingorders)
+	ks, err := datastore.NewQuery("Order").Ancestor(defaultOrderList(c)).Order("Created").Filter("IsPending=", true).GetAll(c, &pendingorders)
 	if err != nil {
 		return nil, err
 	}
@@ -67,7 +67,7 @@ func getAllPendingOrders(c appengine.Context) ([]Order, error) {
 
 func getPendingOrdersForPurchaser(c appengine.Context, pid64 PurchaserId) ([]Order, error) {
 	pendingorders := []Order{}
-	ks, err := datastore.NewQuery("Order").Ancestor(defaultOrderList(c)).Order("Created").Filter("PurchaserId=", pid64).Filter("Pending=", true).GetAll(c, &pendingorders)
+	ks, err := datastore.NewQuery("Order").Ancestor(defaultOrderList(c)).Order("Created").Filter("PurchaserId=", pid64).Filter("IsPending=", true).GetAll(c, &pendingorders)
 	if err != nil {
 		return nil, err
 	}

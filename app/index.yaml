@@ -23,6 +23,19 @@ indexes:
 - kind: Order
   ancestor: yes
   properties:
+  - name: IsPending
+  - name: Created
+
+- kind: Order
+  ancestor: yes
+  properties:
+  - name: IsPending
+  - name: PurchaserId
+  - name: Created
+
+- kind: Order
+  ancestor: yes
+  properties:
   - name: Pending
   - name: Created
 

@@ -301,7 +301,7 @@ appMod.controller('NewOrdersController', ['$scope', '$q', 'ORDERS', 'SKUS', 'PUR
 
       {{ if eq .Nature "EDIT" }}
       <hr>
-      <div ng-show="(order.PendingItems.length > 0)"> <!-- ngshow pending -->
+      <div ng-show="order.IsPenindg"> <!-- ngshow pending -->
 
         <div class="well">
           <h3 class="text-center"> Pending Items In This Order</h3>
